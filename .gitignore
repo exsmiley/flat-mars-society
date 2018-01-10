@@ -23,6 +23,9 @@ hs_err_pid*
 
 # ECLIPSE
 .metadata
+.classpath
+.project
 
 # replays
 *.bc18
+/bin/
