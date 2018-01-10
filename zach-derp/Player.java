@@ -30,6 +30,7 @@ public class Player {
                 // Most methods on gc take unit IDs, instead of the unit objects themselves.
                 if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), Direction.North)) {
                     gc.moveRobot(unit.id(), Direction.North);
+                    if(gc.canReplicate(unit.id(), Direction.South))
                     gc.replicate(unit.id(), Direction.South);
                     
                     if(gc.canBlueprint(unit.id(), UnitType.Factory, Direction.West)) {
