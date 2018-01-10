@@ -24,16 +24,21 @@ public class Player {
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
             VecUnit units = gc.myUnits();
             for (int i = 0; i < units.size(); i++) {
-                Unit unit = units.get(i);
-                try {
-                    gc.replicate(unit.id(), Direction.North);
-                } catch (Exception e) {
-                    
+                if (gc.planet().equals(Planet.Earth)) {
+                    Unit unit = units.get(i);
+                    if (gc.canBlueprint(unit.id(), UnitType.Factory, Direction.South)) {
+                        System.out.println("Trying to blueprint....");
+                        gc.blueprint(unit.id(), UnitType.Factory, Direction.South);
+                        System.out.println("Blueprint succeded");
+                    }
+    
+                    // Most methods on gc take unit IDs, instead of the unit objects themselves.
+                    else if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), Direction.East)) {
+                        gc.moveRobot(unit.id(), Direction.East);
+                    }
                 }
-
-                // Most methods on gc take unit IDs, instead of the unit objects themselves.
-                if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), Direction.East)) {
-                    gc.moveRobot(unit.id(), Direction.East);
+                else {
+                    System.out.println("WE ON MARS.");
                 }
             }
             // Submit the actions we've done, and wait for our next turn.
