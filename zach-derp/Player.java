@@ -4,6 +4,7 @@ import bc.*;
 
 public class Player {
 	
+	// global variable of the game controller that can be accessed anywhere
 	public static GameController gc;
 	
 	/**
@@ -23,14 +24,14 @@ public class Player {
 		if(gc.canMove(id, Direction.North)) {
 			gc.moveRobot(id, Direction.North);
 		}
-		else if(gc.canMove(id, Direction.West)) {
-			gc.moveRobot(id, Direction.West);
+		else if(gc.canMove(id, Direction.East)) {
+			gc.moveRobot(id, Direction.East);
 		}
 		else if(gc.canMove(id, Direction.South)) {
 			gc.moveRobot(id, Direction.South);
 		}
-		else if(gc.canMove(id, Direction.East)) {
-			gc.moveRobot(id, Direction.East);
+		else if(gc.canMove(id, Direction.West)) {
+			gc.moveRobot(id, Direction.West);
 		}
 	}
 	
