@@ -1,0 +1,1 @@
+echo 'y' | docker system prune -a
