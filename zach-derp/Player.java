@@ -6,6 +6,19 @@ public class Player {
 	
 	public static GameController gc;
 	
+	/**
+	 * Generic method to randomly choose an element from an array
+	 * @param arr array to choose an element from
+	 * @return some element in arr
+	 */
+	public static <T> T chooseRandom(T[] arr) {
+		return arr[(int) (Math.random()*arr.length)];
+	}
+	
+	/**
+	 * Tries to move the robot North, West, South, East
+	 * @param id id of the robot to move
+	 */
 	public static void moveRobotSpiral(int id) {
 		if(gc.canMove(id, Direction.North)) {
 			gc.moveRobot(id, Direction.North);
@@ -21,6 +34,10 @@ public class Player {
 		}
 	}
 	
+	/**
+	 * Tries to replicate this robot on an adjacent square if it can
+	 * @param id id of the robot to replicate
+	 */
 	public static void replicateSomewhere(int id) {
 		if(gc.canReplicate(id, Direction.South)) {
 			gc.replicate(id, Direction.South);
@@ -50,9 +67,11 @@ public class Player {
         gc = new GameController();
         
         Team myTeam = gc.team();
+        
+        UnitType[] attackers = new UnitType[] {UnitType.Knight, UnitType.Mage, UnitType.Ranger};
 
         // Direction is a normal java enum.
-        Direction[] directions = Direction.values();
+        Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
         
         while (true) {
             System.out.println("Current round: "+gc.round());
@@ -63,67 +82,67 @@ public class Player {
 
             for (int i = 0; i < units.size(); i++) {
             		try {
-                Unit unit = units.get(i);
-                int id = unit.id();
-                System.out.println("I am a " + unit.unitType());
-                
-                if (unit.unitType().equals(UnitType.Factory)) {
-                    VecUnitID garrison = unit.structureGarrison();
-                    if (garrison.size() > 0) {
-                        Direction d = directions[1];
-                        if (gc.canUnload(unit.id(), d)) {
-                            System.out.println("Unloaded a Knight!");
-                            gc.unload(unit.id(), d);
-                            continue;
-                        }
-                    }
-                    else if (gc.canProduceRobot(unit.id(), UnitType.Knight)) {
-                        gc.produceRobot(unit.id(), UnitType.Knight);
-                        System.out.println("Produced a Knight!");
-                        continue;
-                    }
-                }
-
-                else if(gc.isMoveReady(id)) {
-                	// First, look for nearby blueprints to work on.
-                    Location location = unit.location();
-                    if (location.isOnMap()) {
-                        VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 2);
-                        for (int j = 0; j < nearby.size(); j++) {
-                            Unit other = nearby.get(j);
-                            if (unit.unitType().equals(UnitType.Worker) && (gc.canBuild(unit.id(), other.id()))) {
-                                gc.build(unit.id(), other.id());
-                                System.out.println("Built a factory!");
-                                // move onto the next unit;
-                                continue;
-                            }
-                            if (!(other.team().equals(myTeam)) && (gc.isAttackReady(unit.id())) && gc.canAttack(unit.id(), other.id())) {
-                                System.out.println("Attacked a thing.");
-                                gc.attack(unit.id(), other.id());
-                                continue;
-                            }
-                        }
-                    }
-                		// move and replicate
-                		if(Math.random() < 0.7) {
-	                		try {
-	                			moveRobotSpiral(id);
-	                			if(Math.random() < 0.2) {
-	                				replicateSomewhere(id);
-	                			}
-	                       	
-	                		} catch(Exception e) {
-	                			System.out.println(e);
+	                Unit unit = units.get(i);
+	                int id = unit.id();
+	                UnitType toConstruct = chooseRandom(attackers);
+	                
+	                if (unit.unitType().equals(UnitType.Factory)) {
+	                    VecUnitID garrison = unit.structureGarrison();
+	                    if (garrison.size() > 0) {
+	                        Direction d = chooseRandom(ordinals);
+	                        if (gc.canUnload(unit.id(), d)) {
+	                            System.out.println("Unloaded a unit!");
+	                            gc.unload(unit.id(), d);
+	                            continue;
+	                        }
+	                    }
+	                    else if (gc.canProduceRobot(unit.id(), toConstruct)) {
+	                        gc.produceRobot(unit.id(), toConstruct);
+	                        System.out.println("Produced an attacker!");
+	                        continue;
+	                    }
+	                }
+	
+	                else if(gc.isMoveReady(id)) {
+	                	// First, look for nearby blueprints to work on.
+	                    Location location = unit.location();
+	                    if (location.isOnMap()) {
+	                        VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 2);
+	                        for (int j = 0; j < nearby.size(); j++) {
+	                            Unit other = nearby.get(j);
+	                            if (unit.unitType().equals(UnitType.Worker) && (gc.canBuild(unit.id(), other.id()))) {
+	                                gc.build(unit.id(), other.id());
+	                                System.out.println("Built a factory!");
+	                                // move onto the next unit;
+	                                continue;
+	                            }
+	                            if (!(other.team().equals(myTeam)) && (gc.isAttackReady(unit.id())) && gc.canAttack(unit.id(), other.id())) {
+	                                System.out.println("Attacked a thing.");
+	                                gc.attack(unit.id(), other.id());
+	                                continue;
+	                            }
+	                        }
+	                    }
+	                		// move and replicate
+	                		if(Math.random() < 0.85) {
+		                		try {
+		                			moveRobotSpiral(id);
+		                			if(Math.random() < 0.2) {
+		                				replicateSomewhere(id);
+		                			}
+		                       	
+		                		} catch(Exception e) {
+		                			System.out.println(e);
+		                		}
+	                		} else {
+	                			Direction d = chooseRandom(ordinals);
+	                			if ((gc.karbonite() > 100) && (gc.canBlueprint(unit.id(), UnitType.Factory, d))) {
+	                            gc.blueprint(unit.id(), UnitType.Factory, d);
+	                        }
 	                		}
-                		} else {
-                			Direction d = Direction.North;
-                			if ((gc.karbonite() > 100) && (gc.canBlueprint(unit.id(), UnitType.Factory, d))) {
-                            gc.blueprint(unit.id(), UnitType.Factory, d);
-                        }
-                		}
-                
-
-                }
+	                
+	
+	                }
             		} catch(Exception e) {
                 		System.out.println(e);
                 }
