@@ -3,5 +3,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="lib" path="/Users/RonLee/Desktop/IAP_2018/6.147/flat-mars-society/battlecode.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/zach-derp"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
