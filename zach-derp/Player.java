@@ -1,58 +1,10 @@
+
 // import the API.
 // See xxx for the javadocs.
 import bc.*;
+import zachderp.*;
 
 public class Player {
-	
-	// global variable of the game controller that can be accessed anywhere
-	public static GameController gc;
-	
-	/**
-	 * Generic method to randomly choose an element from an array
-	 * @param arr array to choose an element from
-	 * @return some element in arr
-	 */
-	public static <T> T chooseRandom(T[] arr) {
-		return arr[(int) (Math.random()*arr.length)];
-	}
-	
-	/**
-	 * Tries to move the robot North, West, South, East
-	 * @param id id of the robot to move
-	 */
-	public static void moveRobotSpiral(int id) {
-		if(gc.canMove(id, Direction.North)) {
-			gc.moveRobot(id, Direction.North);
-		}
-		else if(gc.canMove(id, Direction.East)) {
-			gc.moveRobot(id, Direction.East);
-		}
-		else if(gc.canMove(id, Direction.South)) {
-			gc.moveRobot(id, Direction.South);
-		}
-		else if(gc.canMove(id, Direction.West)) {
-			gc.moveRobot(id, Direction.West);
-		}
-	}
-	
-	/**
-	 * Tries to replicate this robot on an adjacent square if it can
-	 * @param id id of the robot to replicate
-	 */
-	public static void replicateSomewhere(int id) {
-		if(gc.canReplicate(id, Direction.South)) {
-			gc.replicate(id, Direction.South);
-		}
-		else if(gc.canReplicate(id, Direction.East)) {
-			gc.replicate(id, Direction.East);
-		}
-		else if(gc.canReplicate(id, Direction.North)) {
-			gc.replicate(id, Direction.North);
-		}
-		else if(gc.canReplicate(id, Direction.West)) {
-			gc.replicate(id, Direction.West);
-		}
-	}
 	
     public static void main(String[] args) {
         // MapLocation is a data structure you'll use a lot.
@@ -65,11 +17,18 @@ public class Player {
         System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
 
         // Connect to the manager, starting the game
-        gc = new GameController();
+        GameController gc = new GameController();
+        Utils utils = new Utils(gc);
         
         Team myTeam = gc.team();
         
         UnitType[] attackers = new UnitType[] {UnitType.Knight, UnitType.Mage, UnitType.Ranger};
+        
+        // make sure we can get a rocket
+        gc.queueResearch(UnitType.Rocket);
+        // TODO queue other research
+        
+        utils.planRocketLaunches();
 
         // Direction is a normal java enum.
         Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
@@ -85,12 +44,12 @@ public class Player {
             		try {
 	                Unit unit = units.get(i);
 	                int id = unit.id();
-	                UnitType toConstruct = chooseRandom(attackers);
+	                UnitType toConstruct = utils.chooseRandom(attackers);
 	                
 	                if (unit.unitType().equals(UnitType.Factory)) {
 	                    VecUnitID garrison = unit.structureGarrison();
 	                    if (garrison.size() > 0) {
-	                        Direction d = chooseRandom(ordinals);
+	                        Direction d = utils.chooseRandom(ordinals);
 	                        if (gc.canUnload(unit.id(), d)) {
 	                            System.out.println("Unloaded a unit!");
 	                            gc.unload(unit.id(), d);
@@ -108,7 +67,8 @@ public class Player {
 	                	// First, look for nearby blueprints to work on.
 	                    Location location = unit.location();
 	                    if (location.isOnMap()) {
-	                        VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 2);
+	                    
+	                        VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 	unit.attackRange());
 	                        for (int j = 0; j < nearby.size(); j++) {
 	                            Unit other = nearby.get(j);
 	                            if (unit.unitType().equals(UnitType.Worker) && (gc.canBuild(unit.id(), other.id()))) {
@@ -127,16 +87,16 @@ public class Player {
 	                		// move and replicate
 	                		if(Math.random() < 0.85) {
 		                		try {
-		                			moveRobotSpiral(id);
+		                			utils.moveRobotSpiral(id);
 		                			if(Math.random() < 0.2) {
-		                				replicateSomewhere(id);
+		                				utils.replicateSomewhere(id);
 		                			}
 		                       	
 		                		} catch(Exception e) {
 		                			System.out.println(e);
 		                		}
 	                		} else {
-	                			Direction d = chooseRandom(ordinals);
+	                			Direction d = utils.chooseRandom(ordinals);
 	                			if ((gc.karbonite() > 100) && (gc.canBlueprint(unit.id(), UnitType.Factory, d))) {
 	                            gc.blueprint(unit.id(), UnitType.Factory, d);
 	                        }
