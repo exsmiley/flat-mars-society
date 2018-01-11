@@ -49,6 +49,9 @@ public class Player {
 
         // Direction is a normal java enum.
         Direction[] directions = Direction.values();
+        
+        boolean madeFactory = false;
+        boolean done = false;
 
         while (true) {
             System.out.println("Current round: "+gc.round());
@@ -60,10 +63,20 @@ public class Player {
             for (int i = 0; i < units.size(); i++) {
                 Unit unit = units.get(i);
                 int id = unit.id();
+                System.out.println("I am a " + unit.unitType());
 
-                if(gc.isMoveReady(id)) {
-                		moveRobotSpiral(gc, id);
-                		replicateSomewhere(gc, id);
+                if(gc.isMoveReady(id)||!done) {
+               		moveRobotSpiral(gc, id);
+               		replicateSomewhere(gc, id);
+                		// if(!madeFactory && gc.canBlueprint(id, UnitType.Factory, Direction.North)) {
+                		// 	gc.blueprint(id, UnitType.Factory, Direction.North);
+                		// 	madeFactory = true;
+                		// }
+                		// else if(madeFactory) {
+                		// 	if(gc.canBuild(id, UnitType.Factory)) {
+                				
+                		// 	}
+                		// }
                 }
                 
             }

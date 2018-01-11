@@ -29,3 +29,8 @@ hs_err_pid*
 # replays
 *.bc18
 /bin/
+
+.DS_Store
+
+# Viewer
+Viewer.app/
