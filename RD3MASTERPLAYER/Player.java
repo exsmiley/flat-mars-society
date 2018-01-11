@@ -20,6 +20,7 @@ public class Player {
         Direction[] directions = Direction.values();
         
         Team myTeam = gc.team();
+        boolean builtOneFactory = false;
 
         while (true) {
             try {
@@ -33,18 +34,19 @@ public class Player {
                     if (unit.unitType().equals(UnitType.Factory)) {
                         VecUnitID garrison = unit.structureGarrison();
                         if (garrison.size() > 0) {
-                            Direction d = directions[(int)Math.random()*4];
+                            Direction d = directions[(int)(Math.random()*directions.length)];
                             if (gc.canUnload(unit.id(), d)) {
-                                System.out.println("Unloaded a Knight!");
+                                System.out.println("Unloaded a Mage!");
                                 gc.unload(unit.id(), d);
                                 continue;
                             }
                         }
-                        else if (gc.canProduceRobot(unit.id(), UnitType.Knight)) {
-                            gc.produceRobot(unit.id(), UnitType.Knight);
-                            System.out.println("Produced a Knight!");
+                        else if (gc.canProduceRobot(unit.id(), UnitType.Mage)) {
+                            gc.produceRobot(unit.id(), UnitType.Mage);
+                            System.out.println("Produced a Mage!");
                             continue;
                         }
+
                     }
                     
                     // First, look for nearby blueprints to work on.
@@ -56,6 +58,7 @@ public class Player {
                             if (unit.unitType().equals(UnitType.Worker) && (gc.canBuild(unit.id(), other.id()))) {
                                 gc.build(unit.id(), other.id());
                                 System.out.println("Built a factory!");
+                                builtOneFactory = true;
                                 // move onto the next unit;
                                 continue;
                             }
@@ -68,10 +71,10 @@ public class Player {
                     }
                     
                     // Ok there weren't any dudes around, pick a direction at random
-                    Direction d = directions[(int)Math.random()*4];
+                    Direction d = directions[(int)(Math.random()*directions.length)];
                     
                     // or, try to build a factory:
-                    if ((gc.karbonite() > 100) && (gc.canBlueprint(unit.id(), UnitType.Factory, d))) {
+                    if ((gc.karbonite() > 100) && (gc.canBlueprint(unit.id(), UnitType.Factory, d)) && (!builtOneFactory)) {
                         gc.blueprint(unit.id(), UnitType.Factory, d);
                     }
                     
