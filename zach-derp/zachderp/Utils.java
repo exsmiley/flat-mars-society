@@ -19,6 +19,10 @@ public class Utils {
 		return arr[(int) (Math.random()*arr.length)];
 	}
 	
+	public static int randomNum(int big) {
+		return (int) (Math.random()*big);
+	}
+	
 	/**
 	 * Tries to move the robot North, West, South, East
 	 * @param id id of the robot to move
