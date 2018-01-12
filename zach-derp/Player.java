@@ -49,7 +49,6 @@ public class Player {
         boolean hasSomethingQueued = true;
         boolean canRocket = false;
         boolean hasFactory = false;
-        boolean somethingLaunched = false;
         
         // Direction is a normal java enum.
         Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
@@ -90,10 +89,9 @@ public class Player {
 //	                		unit.x
 	                		
 	                	
-	                		if(!somethingLaunched && gc.canLaunchRocket(unit.id(), ml)) {
+	                		if(gc.canLaunchRocket(unit.id(), ml)) {
 		                		gc.launchRocket(unit.id(), ml);
 		                		System.out.println("Launched a rocket to (" + ml.getX() + ", " + ml.getY() + ")");
-		                		somethingLaunched = true;
 		                		ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
 		                		while(!mars.onMap(ml)) {
 		                			ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
@@ -127,10 +125,6 @@ public class Player {
 	                        VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 	unit.visionRange());
 	                        for (int j = 0; j < nearby.size(); j++) {
 	                            Unit other = nearby.get(j);
-//	                            System.out.println(j + " " + other.unitType().name());
-//	                            if(other.unitType().equals(UnitType.Factory) || other.unitType().equals(UnitType.Rocket)) {
-//	                            		System.out.println(other.unitType() + " " + unit.structureIsBuilt() + " " + unit.health());
-//	                            }
 	                            if(!unit.location().isOnMap()) {
 	                            		continue;
 	                            }
@@ -157,15 +151,15 @@ public class Player {
 	                    
 	                		// move and replicate
 	                		if(gc.isMoveReady(id) && Math.random() < 0.85) {
-//		                		try {
-//		                			utils.moveRobotSpiral(id);
-//		                			if(Math.random() < 0.2 && numWorkers < 10) {
-//		                				utils.replicateSomewhere(id);
-//		                			}
-//		                       	
-//		                		} catch(Exception e) {
-//		                			System.out.println(e);
-//		                		}
+		                		try {
+		                			utils.moveRobotSpiral(id);
+		                			if(Math.random() < 0.2 && numWorkers < 10) {
+		                				utils.replicateSomewhere(id);
+		                			}
+		                       	
+		                		} catch(Exception e) {
+		                			System.out.println(e);
+		                		}
 	                		} else {
 	                			Direction d = Utils.chooseRandom(ordinals);
 	                			if(canRocket && gc.planet() == Planet.Earth) {
