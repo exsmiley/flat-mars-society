@@ -13,6 +13,9 @@ public class Player {
         // One slightly weird thing: some methods are currently static methods on a static class called bc.
         // This will eventually be fixed :/
         System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
+        
+        // Initialize turn counter.
+        int turn = 0;
 
         // Connect to the manager, starting the game
         GameController gc = new GameController();
@@ -40,15 +43,18 @@ public class Player {
         int numberOfFactories = 0;
 
         while (true) {
-            System.out.println("Current round: "+gc.round());
-            // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.      
-            if (gc.round() == 1) {
+            System.out.println("Current round: "+gc.round());      
+            if (turn == 1) {
+                // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
                 VecUnit units = gc.myUnits();
                 for (int i = 0; i < units.size(); i++) {
                     Unit unit = units.get(i);
                     allMyUnitIDs.get("Workers").add(unit.id());
                     allMyUnits.put(unit.id(), unit);
                 }
+                
+                //TODO: Do something in round one.
+                
                 gc.nextTurn();
                 continue;
             }        
@@ -85,7 +91,7 @@ public class Player {
                         Unit other = nearby.get(j);
                         if (gc.canBuild(workerID, other.id())) {
                             gc.build(workerID, other.id());
-                            System.out.println("Built a factory!");    
+                            System.out.println("Built a factory!");
                             allMyUnitIDs.get("Factories").add(other.id());
                             allMyUnits.put(other.id(), other);
                             // move onto the next unit;
@@ -93,7 +99,7 @@ public class Player {
                         }
                     }
                     Direction d = ordinals[(int)(Math.random()*ordinals.length)];
-                    if ((gc.karbonite() > 100) && (gc.canBlueprint(workerID, UnitType.Factory, d)) && numberOfFactories < 9) {
+                    if ((gc.karbonite() > 100) && (gc.canBlueprint(workerID, UnitType.Factory, d)) && numberOfFactories < 3) {
                         gc.blueprint(workerID, UnitType.Factory, d);
                         numberOfFactories++;
                     }
