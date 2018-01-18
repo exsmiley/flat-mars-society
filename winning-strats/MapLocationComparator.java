@@ -15,6 +15,8 @@ public class MapLocationComparator implements Comparator<MapLocation>
 	@Override
 	public int compare(MapLocation checkloc, MapLocation oldloc)
 	{
+		if (oldloc.equals(start)) return 1;
+		
 		int checkWeight = (int) checkloc.distanceSquaredTo(start) + (int) checkloc.distanceSquaredTo(end);
 		int oldWeight = (int) oldloc.distanceSquaredTo(start) + (int) oldloc.distanceSquaredTo(end);
 		
