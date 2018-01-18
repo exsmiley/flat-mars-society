@@ -6,6 +6,25 @@ import MapLocationComparator; //HOW THE FUCK DO YOU IMPORT THIS SHIT???
 import java.util.Comparator;
 import bc.*;
 
+/*
+ * HOW TO USE:
+ * In that dank battlecodecode you got, initialize a Pathing object in the form Pathing pathing = new Pathing(); OUTSIDE OF THE LOOP THAT IS YOUR TURN.
+ * This object stores all the paths for all you bots, so if you overwrite it with each turn, you fucking break everything. don't do that.
+ * 
+ * When you want to make one of your robo-bois move or create a path, just call pathingObjectName.moveTo(Unit unit, MapLocation end) where unit is the unit
+ * and end is the place you want to move to. IT IS THE SAME FUNCTION TO MOVE A BOT AND GENERATE A PATH. IF THE ROBOT HAS A PATH IT MOVES, IF NOT IT MAKES ONE
+ * AND MOVES. ez pz. If you want to make a new path just call moveTo(unit, end) with a different end.
+ */
+
+/* 
+ * TODO: 
+ * - FUCKING FIGURE OUT HOW TO FUCKING IMPORT FUCKING MAPLOCATIONCOMPARATOR. FUCK.
+ * - Fix cost to spot calculations. Might have to store full path to each spot or else be smart.
+ * - Implement how to move in groups. Maybe bug pathing or fuzzygoto.
+ * - fuk bichez git muny
+ */
+
+
 public class Pathing 
 {
 	public static GameController gc = new GameController();
@@ -20,6 +39,7 @@ public class Pathing
 		this.paths = paths;
 	}
 	
+	//This is useless. Pls ignore.
 	public static Direction[] getDirs()
 	{
 		Direction[] directions = new Direction[8];
@@ -33,6 +53,7 @@ public class Pathing
 		return directions;
 	}
 	
+	//This is also useless. Nothing to see here.
 	public static Direction flipDirection(Direction dir)
 	{
 		if (dir.equals(Direction.North)) return Direction.South;
@@ -45,6 +66,7 @@ public class Pathing
 		else return Direction.Southeast;
 	}
 	
+	//This is what you're looking for.
 	public static void findPath(Unit unit, MapLocation end)
 	{
 		int id = unit.id();
@@ -90,6 +112,7 @@ public class Pathing
 			{
 				MapLocation next = current.add(dir);
 				
+				//Bush did 9/11
 				boolean passable;
 				if (map.onMap(next)) passable = false;
 				else if ((int) map.isPassableTerrainAt(next) == 1) passable = true;
@@ -129,18 +152,19 @@ public class Pathing
 		paths.put(unit, pathto);
 	}
 	
+	//Look you made it! This is important too. This is what you call in your Player.java 
+	//If the bot doesn't have a saved path, generate one and move it
 	public void moveTo(Unit unit, MapLocation end)
 	{
 		int id=unit.id();
 		
-		//If the bot doesn't have a saved path, generate one and move it
-		if (!(paths.containsKey(unit)))
+		if (!(paths.containsKey(unit)) || !(paths.get(unit).get(paths.get(unit).size()-1).equals(end)))
 		{
 			findPath(unit, end);
 			moveTo(unit, end);
 		}
 		
-		//Move the bot
+		//Move dat boi
 		else
 		{
 			MapLocation loc = paths.get(unit).get(0);
