@@ -2,7 +2,7 @@ import java.util.PriorityQueue;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import MapLocationComparator;
+import MapLocationComparator; //HOW THE FUCK DO YOU IMPORT THIS SHIT???
 import java.util.Comparator;
 import bc.*;
 
@@ -69,7 +69,7 @@ public class Pathing
 		//Initializes PriorityQueue
 		PriorityQueue<MapLocation> q = new PriorityQueue<MapLocation>(1, comparator);
 		
-		//Initializes Hashmap to store length of path to a given space
+		//Initializes Hashmap to store length of path to a given spaced
 		Map<MapLocation, Integer> cost_to_spot = new HashMap<MapLocation, Integer>();
 		
 		//Initializes Hashmap to store best path to a given space
@@ -85,6 +85,7 @@ public class Pathing
 		{
 			MapLocation current = q.peek();
 			
+			//Checks all directions around tile in PriorityQueue
 			for (Direction dir : directions)
 			{
 				MapLocation next = current.add(dir);
@@ -94,8 +95,10 @@ public class Pathing
 				else if ((int) map.isPassableTerrainAt(next) == 1) passable = true;
 				else passable = false;
 				
+				//Check if viable tile
 				if(passable)
 				{
+					//Checks if the path taken to this tile is the most efficient, if so, add to path so far
 					int new_cost = (int) next.distanceSquaredTo(start);
 					
 					q.add(next);
@@ -107,8 +110,12 @@ public class Pathing
 					}
 				}
 			}
+			
+			//removes location from q so not searched twice
+			q.remove(current);
 		}
 		
+		//Constructs and returns ArrayList of MapLocs from start to end
 		ArrayList<MapLocation> pathto = new ArrayList<MapLocation>();
 		
 		MapLocation nextspot = end;
@@ -126,12 +133,14 @@ public class Pathing
 	{
 		int id=unit.id();
 		
+		//If the bot doesn't have a saved path, generate one and move it
 		if (!(paths.containsKey(unit)))
 		{
 			findPath(unit, end);
 			moveTo(unit, end);
 		}
 		
+		//Move the bot
 		else
 		{
 			MapLocation loc = paths.get(unit).get(0);
