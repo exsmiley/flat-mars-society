@@ -194,7 +194,9 @@ public class Player {
                                 try {
                                 	if (!enemyLoc.equals(null)) {
                                     	Direction dir = unit.location().mapLocation().directionTo(enemyLoc);
-                                    	gc.moveRobot(id, dir);
+                                    	if (gc.canMove(id, dir)) {
+                                        	gc.moveRobot(id, dir);
+                                    	}
                                 	}else {
                                 		
                                 		utils.moveRobotSpiral(id);	
