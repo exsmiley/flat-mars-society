@@ -67,6 +67,7 @@ public class Player {
         if (gc.planet().equals(gc.planet().Earth)) {
             MapLocation startLoc = units.get(0).location().mapLocation();        	
             enemyLoc = invertion(gc, earth, startLoc);
+            System.out.println("MADE ENEMY LOC");
         }
 
         
@@ -87,9 +88,10 @@ public class Player {
                     hasSomethingQueued = false;
             }
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
-            
+            units = gc.units();
 //            System.out.println("I have " + units.size() + " units! :)");
             //Counter - counts things
+            /*
             int realNumWorkers = 0;
             int realNumFactories = 0;
             int realNumRangers = 0;
@@ -113,6 +115,7 @@ public class Player {
             	}
             	
             }
+            */
 
             for (int i = 0; i < units.size(); i++) {
                     try {
@@ -192,15 +195,18 @@ public class Player {
                             // move and replicate
                             if(gc.isMoveReady(id) && Math.random() < 0.85) {
                                 try {
-                                	if (!enemyLoc.equals(null)) {
                                     	Direction dir = unit.location().mapLocation().directionTo(enemyLoc);
-                                    	if (gc.canMove(id, dir)) {
+                                    	//System.out.println(dir);
+                                    	//if (gc.canMove(id, dir) && unit.unitType().equals(UnitType.Ranger)) {
+                                    	if(gc.canMove(id, dir)) {
                                         	gc.moveRobot(id, dir);
+                                    	}else {
+                                    		utils.moveRobotSpiral(id);
                                     	}
-                                	}else {
+                                
                                 		
-                                		utils.moveRobotSpiral(id);	
-                                	}
+                                	//	utils.moveRobotSpiral(id);	
+                                	
                                     
                                     if(Math.random() < 0.2 && numWorkers < 10) {
                                         utils.replicateSomewhere(id);
