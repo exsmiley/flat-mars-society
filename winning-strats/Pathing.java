@@ -151,6 +151,21 @@ public class Pathing
 		
 		paths.put(unit, pathto);
 	}
+		
+	/*
+ 
+	              _ _
+	           .-/ / )
+	           |/ / /
+	           /.' /
+	          // .---.
+	         /   .--._\ 
+	        /    `--' /
+	       /     .---'
+	      /    .'
+	          /
+
+	 */
 	
 	//Look you made it! This is important too. This is what you call in your Player.java 
 	//If the bot doesn't have a saved path, generate one and move it
@@ -177,5 +192,6 @@ public class Pathing
 	}
 		
 }  
+
 
 
