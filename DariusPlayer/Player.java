@@ -64,7 +64,7 @@ public class Player {
         MapLocation enemyLoc = null;
 
         
-        if (earth.equals(gc.planet().Earth)) {
+        if (gc.planet().equals(gc.planet().Earth)) {
             MapLocation startLoc = units.get(0).location().mapLocation();        	
             enemyLoc = invertion(gc, earth, startLoc);
         }
@@ -192,9 +192,14 @@ public class Player {
                             // move and replicate
                             if(gc.isMoveReady(id) && Math.random() < 0.85) {
                                 try {
-                                	Direction dir = unit.location().mapLocation().directionTo(enemyLoc);
-                                	//gc.moveRobot(id, dir);
-                                    utils.moveRobotSpiral(id);
+                                	if (!enemyLoc.equals(null)) {
+                                    	Direction dir = unit.location().mapLocation().directionTo(enemyLoc);
+                                    	gc.moveRobot(id, dir);
+                                	}else {
+                                		
+                                		utils.moveRobotSpiral(id);	
+                                	}
+                                    
                                     if(Math.random() < 0.2 && numWorkers < 10) {
                                         utils.replicateSomewhere(id);
                                     }
