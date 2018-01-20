@@ -1,5 +1,5 @@
 package ronderp;
-
+import java.util.*;
 import bc.*;
 
 public class Utils {
@@ -131,4 +131,61 @@ public class Utils {
             return Direction.Southeast;
         }
 	}
+	
+	/**
+	 * Makes two Mmaps, one with amount of Karbonite and one with passable terrain
+	 * @param earth Earth PlanetMap
+	 * @return Array [kMap, passableMap]
+	 */
+	public Mmap[] makeKMapandPassableMap(PlanetMap earth) {
+		Mmap passableMap = new Mmap((int)earth.getWidth(), (int)earth.getHeight(), gc);
+		Mmap kMap = new Mmap((int)earth.getWidth(),(int)earth.getHeight(), gc);
+		for (int y = 0; y < earth.getHeight(); y++) {
+			for (int x = 0; x < earth.getWidth(); x++) {
+				MapLocation ml = new MapLocation(Planet.Earth,x,y);
+				passableMap.set(ml, (int)earth.isPassableTerrainAt(ml));
+				kMap.set(ml, (int)earth.initialKarboniteAt(ml));
+				
+			}
+		}
+		Mmap[] output = {kMap, passableMap};
+		return output;
+	}
+	
+	/**
+	 * Gets a list of locations with karbonite in order of closest to farthest
+	 * @param earth The map we are looking on (doesnt have to be earth i think)
+	 * @param kMap The Mmap that has Karbonite amounts in it
+	 * @param location The location you want to compare two when finding them
+	 * @return kLocs, a lost of locations with karbonite in order of closest to farthest
+	 */
+	public ArrayList<MapLocation> getKLocs(PlanetMap earth, Mmap kMap, MapLocation location) {
+		
+		ArrayList<MapLocation> kLocs = new ArrayList<MapLocation>();
+		Mmap evalMap = new Mmap((int)earth.getWidth(), (int)earth.getHeight(),gc);
+		ArrayList<MapLocation> currentLocs = new ArrayList<MapLocation>();
+		currentLocs.add(location);
+		Direction[] directions = {Direction.North, Direction.Northeast, Direction.East, Direction.Southeast, Direction.South, Direction.Southwest, Direction.West, Direction.Northwest};
+		
+		//This is like some weird BFS looking for locations with karbonite
+		while(currentLocs.size()>0) {
+			ArrayList<MapLocation> nextLocs = new ArrayList<MapLocation>();
+			for (int i = 0; i < currentLocs.size(); i++) {
+				MapLocation loc = currentLocs.get(i);
+				for (Direction dir : directions) {
+					MapLocation newPlace = loc.add(dir);
+					if (evalMap.get(newPlace)==0){
+						evalMap.set(newPlace, 1);
+						nextLocs.add(newPlace);
+						if (kMap.get(newPlace)>0){
+							kLocs.add(loc);
+						}
+					}
+				}
+			}
+			currentLocs = nextLocs;
+		}
+		return kLocs;
+	}
+	
 }
