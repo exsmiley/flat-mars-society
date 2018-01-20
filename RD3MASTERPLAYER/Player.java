@@ -53,7 +53,7 @@ public class Player {
         Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
         
         // Initialize pathing object to help bois move places
-        Pathing pathing = new Pathing(startingUnits, mars, earth);
+        Pathing pathing = new Pathing(mars, earth, gc);
         
         while (true) {
             System.out.println("Current round: "+gc.round());
@@ -188,6 +188,7 @@ public class Player {
                             for (int j = 0; j < nearby.size(); j++) {
                                 Unit other = nearby.get(j);
                                 if (!other.team().equals(myTeam)) {
+                                    /*
                                     Direction enemyDirection = location.mapLocation().directionTo(other.location().mapLocation());
                                     if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
                                         gc.attack(id, other.id());
@@ -196,10 +197,14 @@ public class Player {
                                         gc.moveRobot(id, enemyDirection);
                                         hasMoved = true;
                                     }
+                                    */
+                                    pathing.moveTo(unit, other.location().mapLocation());
+                                    hasMoved = true;
                                 }
                             }
                             
                             if (!hasMoved && unit.movementHeat() < 10) {
+                                /*
                                 Direction directionTowardEnemy = location.mapLocation().directionTo(enemyLoc);
                                 Direction randomDirection = Utils.chooseRandom(ordinals);
                                 if (gc.canMove(id, directionTowardEnemy)) {
@@ -209,6 +214,8 @@ public class Player {
                                 else if (gc.canMove(id, randomDirection)) {
                                     gc.moveRobot(id, randomDirection);
                                 }
+                                */
+                                pathing.moveTo(unit, enemyLoc);
                             }
                         }
                     }
