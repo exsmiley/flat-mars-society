@@ -55,6 +55,25 @@ public class Utils {
     }
 	
 	/**
+	 * Tries to harvest on a square adjacent to the robot.
+	 * @param id id of the robot looking to harvest
+	 */
+	public void harvestSomething(int id) {
+	    if (gc.canHarvest(id, Direction.North)) {
+	        gc.harvest(id, Direction.North);
+	    }
+	    else if (gc.canHarvest(id, Direction.South)) {
+            gc.harvest(id, Direction.South);
+        }
+	    else if (gc.canHarvest(id, Direction.West)) {
+            gc.harvest(id, Direction.West);
+        }
+	    else if (gc.canHarvest(id, Direction.East)) {
+            gc.harvest(id, Direction.East);
+        }
+	}
+	
+	/**
 	 * Tries to replicate this robot on an adjacent square if it can
 	 * @param id id of the robot to replicate
 	 */

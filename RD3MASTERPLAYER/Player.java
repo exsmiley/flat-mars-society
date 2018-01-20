@@ -1,6 +1,7 @@
 // import the API.
 // See xxx for the javadocs.
 import bc.*;
+import ronderp.Pathing;
 import ronderp.Utils;
 
 import java.util.*;
@@ -35,11 +36,12 @@ public class Player {
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
+        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
         // TODO queue other research
         
-        // rocket stuff maybe TODO
         utils.planRocketLaunches();
-        System.out.println((int) mars.getWidth());
         MapLocation ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
         while((!mars.onMap(ml)) || mars.isPassableTerrainAt(ml) == 0) {
             ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
@@ -50,14 +52,13 @@ public class Player {
         // Direction is a normal java enum.
         Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
         
+        // Initialize pathing object to help bois move places
+        Pathing pathing = new Pathing(startingUnits, mars, earth);
+        
         while (true) {
             System.out.println("Current round: "+gc.round());
             if(!canRocket && gc.researchInfo().getLevel(UnitType.Rocket) >= 1) {
                     canRocket = true;
-            }
-            
-            if(gc.researchInfo().roundsLeft() == 0) {
-                    // TODO queue something new
             }
             
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
@@ -76,14 +77,16 @@ public class Player {
                         if (location.isOnMap()) {     
                             VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
                             boolean hasMoved = false;
+                            boolean hasActed = false;
                             for (int j = 0; j < nearby.size(); j++) {
                                 Unit other = nearby.get(j);
                                 
                                 // We don't want to build the enemy factories for them, lol.
-                                if ((other.unitType().equals(UnitType.Factory) || other.unitType().equals(UnitType.Rocket)) && other.team().equals(myTeam)) {
+                                if ((other.unitType().equals(UnitType.Factory) || other.unitType().equals(UnitType.Rocket)) && other.team().equals(myTeam) && !hasActed) {
                                     if (gc.canBuild(id, other.id())) {
                                         gc.build(unit.id(), other.id());
                                         // move onto the next unit;
+                                        hasActed = true;
                                         continue;
                                     }
                                     // Walk toward factory to work on it.
@@ -97,7 +100,7 @@ public class Player {
                                             }
                                         }
                                         
-                                        // Otherwise, just chill next to the factory.
+                                        // Otherwise, just chill next to the factory for now.
                                     }
                                 }
                                 
@@ -111,30 +114,32 @@ public class Player {
                                         hasMoved = true;
                                     }
                                 }
-                            }                   
+                            }       
                             
                             Direction randomDirection = Utils.chooseRandom(ordinals);
                             // Replicate yourself
-                            if (gc.canReplicate(id, randomDirection) && numOfWorkers < 3 && unit.abilityHeat() < 10) {
+                            if (gc.canReplicate(id, randomDirection) && numOfWorkers < 3 && unit.abilityHeat() < 10 && !hasActed) {
                                 gc.replicate(id, randomDirection);
                                 numOfWorkers++;
                             }
                             
                             // Blueprint a factory                           
-                            else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && numOfFactories < 3) {
+                            else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && numOfFactories < 3 && !hasActed) {
                                 gc.blueprint(id, UnitType.Factory, randomDirection);
                                 numOfFactories++;
                             }
                             
                             // If not a rocket
                             else if (canRocket) {
-                                if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && numOfRockets < 3) {
+                                if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && numOfRockets < 3 && !hasActed) {
                                     gc.blueprint(id, UnitType.Rocket, randomDirection);
                                     numOfRockets++;
                                 }
                             }
                             
-                            // TODO: Try to harvest with the worker.
+                            else if (!hasActed) {
+                                utils.harvestSomething(id); // Attempts to harvest karbonite from adjacent squares.
+                            }
                             
                             // Move if you haven't already
                             if (!hasMoved && unit.movementHeat() < 10) {
@@ -179,7 +184,7 @@ public class Player {
                         boolean hasMoved = false;
                         Location location = unit.location();                      
                         if (location.isOnMap()) {     
-                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
+                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 50);
                             for (int j = 0; j < nearby.size(); j++) {
                                 Unit other = nearby.get(j);
                                 if (!other.team().equals(myTeam)) {
