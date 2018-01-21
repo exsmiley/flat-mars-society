@@ -229,4 +229,54 @@ public class Utils {
 		
 	}
 	
+	/**
+	 * Determines if any factories are adjacent to the inputed location
+	 * @param loc A MapLocation you want to test
+	 * @return True or False
+	 */
+	public Boolean isAFactoryAdjacent(MapLocation loc) {
+		if (gc.senseNearbyUnitsByType(loc, 2, UnitType.Factory).size() > 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Determines if placing a factory at the given location on the given planet would block a path
+	 * @param earth The PlanetMap you want to check on
+	 * @param loc The MapLocation you are checking
+	 * @return True or False
+	 */
+	public Boolean isBlockingPath(PlanetMap earth, MapLocation loc) {
+
+		Boolean isNorth = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.North));
+		Boolean isNortheast = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.Northeast));
+		Boolean isEast = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.East));
+		Boolean isSoutheast = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.Southeast));
+		Boolean isSouth = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.South));
+		Boolean isSouthwest = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.Southwest));
+		Boolean isWest = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.West));
+		Boolean isNorthwest = 1 == (int)earth.isPassableTerrainAt(loc.add(Direction.Northwest));
+		
+		//I couldn't figure out how to actually do this. This is a bit strong of a check than needed.
+		//This will return true when it is blocking a path, but also return true when its in a corner or a position where a path through didnt exist anyway
+		//But maybe that is a good thing! Do we want factories with only 1-3 exit points?
+		if (isWest && (isNortheast || isEast || isSoutheast)) {
+			return true;
+		}
+		if (isNorthwest && (isSouthwest || isSouth || isSoutheast || isEast || isNortheast)) {
+			return true;
+		}
+		if (isNorth && (isSouthwest || isSouth || isSoutheast)) {
+			return true;
+		}
+		if (isNortheast && (isWest || isSouthwest || isSouth || isSoutheast)) {
+			return true;
+		}
+		if (isEast && (isNorthwest || isWest || isSouthwest)) {
+			return true;
+		}
+		return false;
+	}
+	
 }
