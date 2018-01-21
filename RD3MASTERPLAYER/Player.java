@@ -233,7 +233,7 @@ public class Player {
             }
             
             // Check whether or not to keep producing each unit.
-            if (numOfRangers > 50) {
+            if (numOfRangers > 15) {
                 produceRangers = false;
             }
             else {

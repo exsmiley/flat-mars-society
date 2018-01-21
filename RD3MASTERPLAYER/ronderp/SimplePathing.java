@@ -117,6 +117,10 @@ public class SimplePathing {
             }
         }
         
+        else if(paths.get(id).size() == 0) {
+            // Do nothing, you are standing where you want to be.
+        }
+        
         else if(!(paths.get(id).get(paths.get(id).size()-1).equals(end))) {
             boolean foundPath = findPath(unit, end);
             if (foundPath) {
