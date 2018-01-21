@@ -40,10 +40,10 @@ public class Player {
         Mmap passableMap = output[1]; //map with 1 on passable terrain, 0 on impassible terrain
         
         //List of locations that have karbonite from closets to farthest.
+        ArrayList<MapLocation> kLocs = new ArrayList<MapLocation>();
         if (gc.planet().equals(Planet.Earth)) {
-            ArrayList<MapLocation> kLocs = utils.getKLocs(earth, kMap, startingUnits.get(0).location().mapLocation());
+            kLocs = utils.getKLocs(earth, kMap, startingUnits.get(0).location().mapLocation());
         }
-        
         
         // make sure we can get a rocket
         System.out.println("Queuing rocket research: " + gc.queueResearch(UnitType.Rocket));
@@ -91,10 +91,14 @@ public class Player {
                     int id = unit.id();
                     UnitType toConstruct = UnitType.Ranger;
                     
+                    
+                    //WORKER LOGIC
                     if(unit.unitType().equals(UnitType.Worker)) {
-                        numOfWorkers++;                      
+                        numOfWorkers++;
+                        
                         // First, look for nearby blueprints to work on.
                         Location location = unit.location();
+                        MapLocation maplocation = unit.location().mapLocation();
                         
                         if (location.isOnMap()) {     
                             VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
@@ -156,8 +160,29 @@ public class Player {
                                 }
                             }
                             
-                            // Attempts to harvest karbonite from adjacent squares.
+                            // Get Karbonite
                             else if (!hasActed) {
+                            	//First try adjacent squares
+                            	Direction bestDir = utils.bestKarboniteDirection(earth, maplocation);
+                            	if (gc.karboniteAt(maplocation.add(bestDir)) > 0) {
+                            		if (gc.canHarvest(id, bestDir)) {
+                            			gc.harvest(id, bestDir);
+                            		}
+                            	}
+                            	//Then go to the next closest location
+                            	else if (gc.isMoveReady(id) && gc.planet().equals(Planet.Earth)) {
+									if (kLocs.size() > 0) {
+                            			MapLocation destination = kLocs.get(0);
+                            			if (gc.canSenseLocation(destination)) {
+                            				int kAmt = (int)gc.karboniteAt(destination);
+                            				if (kAmt == 0) {
+                            					kLocs.remove(0);
+                            				}else {
+                            					pathing.moveTo(unit, destination);
+                            				}
+                            			}
+                            		}
+                            	}
                                 utils.harvestSomething(id); 
                             }
                             
@@ -171,6 +196,7 @@ public class Player {
                         }
                     }
                     
+                    //ROCKET LOGIC
                     else if (unit.unitType().equals(UnitType.Rocket)) { 
                         numOfRockets++;
                         if(gc.canLaunchRocket(id, ml)) {
@@ -183,6 +209,7 @@ public class Player {
                         }
                     }
                     
+                    //FACTORY LOGIC
                     else if (unit.unitType().equals(UnitType.Factory)) {
                         numOfFactories++;
                         VecUnitID garrison = unit.structureGarrison();
@@ -201,6 +228,7 @@ public class Player {
                         }
                     }
                     
+                    //RANGER LOGIC
                     else if (unit.unitType().equals(UnitType.Ranger)) {
                         numOfRangers++;
                         boolean hasMoved = false;
