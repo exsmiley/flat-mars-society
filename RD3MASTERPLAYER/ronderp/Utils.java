@@ -188,4 +188,45 @@ public class Utils {
 		return kLocs;
 	}
 	
+	/**
+	 * Checks to see if a location is on the given planet (doesnt have to be earth)
+	 * @param earth The planet Map you are checking on
+	 * @param loc The MapLocation you are checking
+	 * @return True or False
+	 */
+	public Boolean onEarth(PlanetMap earth, MapLocation loc) {
+		if (loc.getX()<0 || loc.getY()<0 || loc.getX()>=earth.getWidth() || loc.getY()>=earth.getHeight()) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Determines location to go to get to the adjacent square with the most karbonite
+	 * @param earth planet we are on
+	 * @param loc Location we are searching from
+	 * @return A Direction
+	 */
+	public Direction bestKarboniteDirection(PlanetMap earth, MapLocation loc) {
+		int mostK = 0;
+		Direction bestDir = null;
+		Direction[] directions = {Direction.North, Direction.Northeast, Direction.East, Direction.Southeast, Direction.South, Direction.Southwest, Direction.West, Direction.Northwest, Direction.Center};
+		for (Direction dir : directions) {
+			int newK = 0;
+			MapLocation newLoc = loc.add(dir);
+			if (!onEarth(earth, newLoc)) {
+				newK = 0;
+			}else {
+				newK= (int)gc.karboniteAt(newLoc);
+			}
+			if (newK > mostK) {
+				mostK = newK;
+				bestDir = dir;
+			}
+		}
+		return bestDir;
+		
+		
+	}
+	
 }
