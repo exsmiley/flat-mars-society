@@ -4,6 +4,7 @@ import bc.*;
 import ronderp.Pathing;
 import ronderp.Utils;
 import ronderp.Mmap;
+import ronderp.SimplePathing;
 
 import java.util.*;
 
@@ -23,7 +24,6 @@ public class Player {
         int numOfWorkers = 0;
         int numOfRangers = 0;
         
-        
         // Guess enemy spawn
         VecUnit startingUnits = gc.myUnits();
         MapLocation enemyLoc = new MapLocation(Planet.Earth, 1, 1);
@@ -39,7 +39,6 @@ public class Player {
         
         //List of locations that have karbonite from closets to farthest.
         ArrayList<MapLocation> kLocs = utils.getKLocs(earth, kMap, startingUnits.get(0).location().mapLocation());
-        
         
         
         
@@ -65,7 +64,7 @@ public class Player {
         Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
         
         // Initialize pathing object to help bois move places
-        Pathing pathing = new Pathing(mars, earth, gc);
+        SimplePathing pathing = new SimplePathing(mars, earth, gc);
         
         while (true) {
             System.out.println("Current round: "+gc.round());
@@ -184,7 +183,7 @@ public class Player {
                                 continue;
                             }
                         }
-                        else if (gc.canProduceRobot(unit.id(), toConstruct) && numOfRangers < 15) {
+                        else if (gc.canProduceRobot(unit.id(), toConstruct) && numOfRangers < 2) {
                             gc.produceRobot(unit.id(), toConstruct);
                             System.out.println("Produced an attacker!");
                             numOfRangers++;
@@ -210,8 +209,8 @@ public class Player {
                                         hasMoved = true;
                                     }
                                     */
-                                    pathing.moveTo(unit, other.location().mapLocation());
-                                    hasMoved = true;
+                                    //pathing.findPath(unit, other.location().mapLocation());
+                                    //hasMoved = true;
                                 }
                             }
                             
@@ -227,7 +226,7 @@ public class Player {
                                     gc.moveRobot(id, randomDirection);
                                 }
                                 */
-                                pathing.moveTo(unit, enemyLoc);
+                                pathing.findPath(unit, new MapLocation(Planet.Earth, 4 ,4));
                             }
                         }
                     }

@@ -80,18 +80,19 @@ public class Pathing
 		//Search spaces until it gets to end spot
 		while (!q.contains(end))
 		{
-			MapLocation current = q.peek();
+		    MapLocation current = q.peek();
 			
 			//Checks all directions around tile in PriorityQueue
 			for (Direction dir : directions)
 			{
-				MapLocation next = current.add(dir);
+			    MapLocation next = current.add(dir);
 				
-				//Bush did 9/11
+			    //Bush did 9/11
 				boolean passable;
-				if (map.onMap(next)) passable = false;
+				if (!map.onMap(next)) passable = false;
 				else if ((int) map.isPassableTerrainAt(next) == 1) passable = true;
-				else passable = false;
+				else passable = true;
+				
 				
 				//Check if viable tile
 				if(passable)
@@ -105,6 +106,7 @@ public class Pathing
 					{
 						cost_to_spot.put(next, new_cost);
 						path.put(next, current);
+						System.out.println(path.toString());
 					}
 				}
 			}
@@ -113,6 +115,7 @@ public class Pathing
 			q.remove(current);
 		}
 		
+		System.out.println("after for loop");
 		//Constructs and returns ArrayList of MapLocs from start to end
 		ArrayList<MapLocation> pathto = new ArrayList<MapLocation>();
 		
