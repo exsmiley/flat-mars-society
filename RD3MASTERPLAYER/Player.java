@@ -19,10 +19,12 @@ public class Player {
         PlanetMap mars = gc.startingMap(Planet.Mars);
         
         Team myTeam = gc.team();
-        int numOfFactories = 0;
-        int numOfRockets = 0;
-        int numOfWorkers = 0;
-        int numOfRangers = 0;
+        
+        // Whether or not to keep producing specific units
+        boolean produceWorkers = true;
+        boolean produceRockets = true;
+        boolean produceFactories = true;
+        boolean produceRangers = true;
         
         // Guess enemy spawn
         VecUnit startingUnits = gc.myUnits();
@@ -69,6 +71,13 @@ public class Player {
         
         while (true) {
             System.out.println("Current round: "+gc.round());
+            
+            // Initialize number of each unit to 0 at beginning of each round.
+            int numOfFactories = 0;
+            int numOfRockets = 0;
+            int numOfWorkers = 0;
+            int numOfRangers = 0;
+            
             if(!canRocket && gc.researchInfo().getLevel(UnitType.Rocket) >= 1) {
                     canRocket = true;
             }
@@ -83,6 +92,7 @@ public class Player {
                     UnitType toConstruct = UnitType.Ranger;
                     
                     if(unit.unitType().equals(UnitType.Worker)) {
+                        numOfWorkers++;                      
                         // First, look for nearby blueprints to work on.
                         Location location = unit.location();
                         
@@ -130,27 +140,25 @@ public class Player {
                             
                             Direction randomDirection = Utils.chooseRandom(ordinals);
                             // Replicate yourself
-                            if (gc.canReplicate(id, randomDirection) && numOfWorkers < 1 && unit.abilityHeat() < 10 && !hasActed) {
+                            if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10 && !hasActed) {
                                 gc.replicate(id, randomDirection);
-                                numOfWorkers++;
                             }
                             
                             // Blueprint a factory                           
-                            else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && numOfFactories < 1 && !hasActed) {
+                            else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && produceFactories && !hasActed) {
                                 gc.blueprint(id, UnitType.Factory, randomDirection);
-                                numOfFactories++;
                             }
                             
                             // If not a rocket
                             else if (canRocket) {
-                                if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && numOfRockets < 1 && !hasActed) {
+                                if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && produceRockets && !hasActed) {
                                     gc.blueprint(id, UnitType.Rocket, randomDirection);
-                                    numOfRockets++;
                                 }
                             }
                             
+                            // Attempts to harvest karbonite from adjacent squares.
                             else if (!hasActed) {
-                                utils.harvestSomething(id); // Attempts to harvest karbonite from adjacent squares.
+                                utils.harvestSomething(id); 
                             }
                             
                             // Move if you haven't already
@@ -164,6 +172,7 @@ public class Player {
                     }
                     
                     else if (unit.unitType().equals(UnitType.Rocket)) { 
+                        numOfRockets++;
                         if(gc.canLaunchRocket(id, ml)) {
                             gc.launchRocket(id, ml);
                             System.out.println("Launched a rocket to (" + ml.getX() + ", " + ml.getY() + ")");
@@ -175,6 +184,7 @@ public class Player {
                     }
                     
                     else if (unit.unitType().equals(UnitType.Factory)) {
+                        numOfFactories++;
                         VecUnitID garrison = unit.structureGarrison();
                         if (garrison.size() > 0) {
                             Direction d = Utils.chooseRandom(ordinals);
@@ -184,15 +194,15 @@ public class Player {
                                 continue;
                             }
                         }
-                        else if (gc.canProduceRobot(unit.id(), toConstruct) && numOfRangers < 25) {
+                        else if (gc.canProduceRobot(unit.id(), toConstruct) && produceRangers) {
                             gc.produceRobot(unit.id(), toConstruct);
                             System.out.println("Produced an attacker!");
-                            numOfRangers++;
                             continue;
                         }
                     }
                     
                     else if (unit.unitType().equals(UnitType.Ranger)) {
+                        numOfRangers++;
                         boolean hasMoved = false;
                         Location location = unit.location();  
                         if (location.isOnMap()) {  
@@ -205,8 +215,8 @@ public class Player {
                                         gc.attack(id, other.id());
                                     }
                                     else if (unit.movementHeat() < 10) {
-                                        //pathing.moveTo(unit, other.location().mapLocation());
-                                        //hasMoved = true;
+                                        pathing.moveTo(unit, other.location().mapLocation());
+                                        hasMoved = true;
                                     }                                   
                                 }
                             }
@@ -220,6 +230,32 @@ public class Player {
                         System.out.println(e);
                 }
                 
+            }
+            
+            // Check whether or not to keep producing each unit.
+            if (numOfRangers > 50) {
+                produceRangers = false;
+            }
+            else {
+                produceRangers = true;
+            }
+            if (numOfRockets > 3) {
+                produceRockets = false;
+            }
+            else {
+                produceRockets = true;
+            }
+            if (numOfFactories > 3) {
+                produceFactories = false;
+            }
+            else {
+                produceFactories = true;
+            }
+            if (numOfWorkers > 5) {
+                produceWorkers = false;
+            }
+            else {
+                produceWorkers = true;
             }
             
             // Submit the actions we've done, and wait for our next turn.
