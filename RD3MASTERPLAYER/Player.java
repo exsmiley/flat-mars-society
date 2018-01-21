@@ -130,20 +130,20 @@ public class Player {
                             
                             Direction randomDirection = Utils.chooseRandom(ordinals);
                             // Replicate yourself
-                            if (gc.canReplicate(id, randomDirection) && numOfWorkers < 3 && unit.abilityHeat() < 10 && !hasActed) {
+                            if (gc.canReplicate(id, randomDirection) && numOfWorkers < 1 && unit.abilityHeat() < 10 && !hasActed) {
                                 gc.replicate(id, randomDirection);
                                 numOfWorkers++;
                             }
                             
                             // Blueprint a factory                           
-                            else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && numOfFactories < 3 && !hasActed) {
+                            else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && numOfFactories < 1 && !hasActed) {
                                 gc.blueprint(id, UnitType.Factory, randomDirection);
                                 numOfFactories++;
                             }
                             
                             // If not a rocket
                             else if (canRocket) {
-                                if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && numOfRockets < 3 && !hasActed) {
+                                if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && numOfRockets < 1 && !hasActed) {
                                     gc.blueprint(id, UnitType.Rocket, randomDirection);
                                     numOfRockets++;
                                 }
@@ -184,7 +184,7 @@ public class Player {
                                 continue;
                             }
                         }
-                        else if (gc.canProduceRobot(unit.id(), toConstruct) && numOfRangers < 2) {
+                        else if (gc.canProduceRobot(unit.id(), toConstruct) && numOfRangers < 25) {
                             gc.produceRobot(unit.id(), toConstruct);
                             System.out.println("Produced an attacker!");
                             numOfRangers++;
@@ -194,40 +194,25 @@ public class Player {
                     
                     else if (unit.unitType().equals(UnitType.Ranger)) {
                         boolean hasMoved = false;
-                        Location location = unit.location();                      
-                        if (location.isOnMap()) {     
+                        Location location = unit.location();  
+                        if (location.isOnMap()) {  
                             VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 50);
                             for (int j = 0; j < nearby.size(); j++) {
                                 Unit other = nearby.get(j);
                                 if (!other.team().equals(myTeam)) {
-                                    /*
-                                    Direction enemyDirection = location.mapLocation().directionTo(other.location().mapLocation());
+                                    
                                     if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
                                         gc.attack(id, other.id());
                                     }
-                                    else if (gc.canMove(id, enemyDirection) && !hasMoved && unit.movementHeat() < 10) {
-                                        gc.moveRobot(id, enemyDirection);
-                                        hasMoved = true;
-                                    }
-                                    */
-                                    pathing.findPath(unit, other.location().mapLocation());
-                                    hasMoved = true;
+                                    else if (unit.movementHeat() < 10) {
+                                        //pathing.moveTo(unit, other.location().mapLocation());
+                                        //hasMoved = true;
+                                    }                                   
                                 }
                             }
                             
                             if (!hasMoved && unit.movementHeat() < 10) {
-                                /*
-                                Direction directionTowardEnemy = location.mapLocation().directionTo(enemyLoc);
-                                Direction randomDirection = Utils.chooseRandom(ordinals);
-                                if (gc.canMove(id, directionTowardEnemy)) {
-                                    gc.moveRobot(id, directionTowardEnemy); // TODO: Change path
-                                    hasMoved = true;
-                                }                              
-                                else if (gc.canMove(id, randomDirection)) {
-                                    gc.moveRobot(id, randomDirection);
-                                }
-                                */
-                                pathing.findPath(unit, enemyLoc);
+                                pathing.moveTo(unit, enemyLoc);
                             }
                         }
                     }

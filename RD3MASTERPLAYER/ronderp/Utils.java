@@ -49,9 +49,9 @@ public class Utils {
 	 * @returns location of new target
 	 */
 	public MapLocation invertion(PlanetMap earth, MapLocation invertingLoc) {
-        int newx = (int)earth.getWidth()-invertingLoc.getX();
-        int newy = (int)earth.getHeight()-invertingLoc.getY();
-        return new MapLocation(gc.planet().Earth,newx,newy);
+        int newx = (int)earth.getWidth()-invertingLoc.getX()-1;
+        int newy = (int)earth.getHeight()-invertingLoc.getY()-1;
+        return new MapLocation(Planet.Earth, newx, newy);
     }
 	
 	/**
