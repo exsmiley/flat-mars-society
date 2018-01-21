@@ -44,8 +44,8 @@ public class SimplePathing {
             }
         }
         
-        Map<MapLocation, MapLocation> visited = new HashMap<>();
-        visited.put(start, null);
+        Map<Twople, Twople> visited = new HashMap<>();
+        visited.put(new Twople(start), null);
         List<MapLocation> queue = new ArrayList<>(Arrays.asList(start));
         boolean done = false;
         while(queue.size() != 0) {
@@ -54,16 +54,13 @@ public class SimplePathing {
             for (Direction d: directions) {
                 MapLocation next = node.add(d);
                 if (next.equals(end)) {
-                    visited.put(next, node);
+                    visited.put(new Twople(next), new Twople(node));
                     done = true;
                     break;
                 }
 
-                if (!visited.containsKey(next) && earth.onMap(next) && earth.isPassableTerrainAt(next) == 1) { 
-                    System.out.println(next);
-                    System.out.println(visited.keySet());
-                    System.out.println(visited.containsKey(next));
-                    visited.put(next, node);
+                if (!visited.containsKey(new Twople(next)) && earth.onMap(next) && earth.isPassableTerrainAt(next) == 1) { 
+                    visited.put(new Twople(next), new Twople(node));
                     queue.add(next);
                 }
             }
@@ -81,9 +78,9 @@ public class SimplePathing {
         return false;
     }
     
-    public List<MapLocation> reconstructPath(MapLocation start, MapLocation end, Map<MapLocation, MapLocation> visited) {
+    public List<MapLocation> reconstructPath(MapLocation start, MapLocation end, Map<Twople, Twople> visited) {
         List<MapLocation> finalPath = new ArrayList<>(Arrays.asList(end));
-        MapLocation next = visited.get(end);
+        Twople next = visited.get(new Twople(end));
         while (!next.equals(start)) {
             finalPath.add(next);
             next = visited.get(next);
