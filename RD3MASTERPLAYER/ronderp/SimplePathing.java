@@ -79,14 +79,18 @@ public class SimplePathing {
     }
     
     public List<MapLocation> reconstructPath(MapLocation start, MapLocation end, Map<Twople, Twople> visited) {
-        List<MapLocation> finalPath = new ArrayList<>(Arrays.asList(end));
+        List<Twople> finalPath = new ArrayList<>(Arrays.asList(new Twople(end)));
         Twople next = visited.get(new Twople(end));
-        while (!next.equals(start)) {
+        while (!next.equals(new Twople(start))) {
             finalPath.add(next);
             next = visited.get(next);
         }
-        finalPath.add(start);
+        finalPath.add(new Twople(start));
         Collections.reverse(finalPath);
-        return finalPath;
+        List<MapLocation> newestFinalPath = new ArrayList<>();
+        for (Twople t: finalPath) {
+            newestFinalPath.add(new MapLocation(t.getPlanet(), t.getX(), t.getY()));
+        }
+        return newestFinalPath;
     }
 }
