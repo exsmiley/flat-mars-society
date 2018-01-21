@@ -3,6 +3,7 @@
 import bc.*;
 import ronderp.Pathing;
 import ronderp.Utils;
+import ronderp.Mmap;
 
 import java.util.*;
 
@@ -30,6 +31,17 @@ public class Player {
             MapLocation startLoc = startingUnits.get(0).location().mapLocation();           
             enemyLoc = utils.invertion(earth, startLoc);
         }
+        
+        //Fun with maps!
+        Mmap[] output = utils.makeKMapandPassableMap(earth);
+        Mmap kMap = output[0]; //map wiht karbonite values
+        Mmap passableMap = output[1]; //map with 1 on passable terrain, 0 on impassible terrain
+        
+        //List of locations that have karbonite from closets to farthest.
+        ArrayList<MapLocation> kLocs = utils.getKLocs(earth, kMap, startingUnits.get(0).location().mapLocation());
+        
+        
+        
         
         // make sure we can get a rocket
         System.out.println("Queuing rocket research: " + gc.queueResearch(UnitType.Rocket));
