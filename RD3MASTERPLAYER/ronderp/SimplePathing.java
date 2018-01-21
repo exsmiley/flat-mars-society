@@ -69,7 +69,7 @@ public class SimplePathing {
             }          
         }
         
-        if (visited.containsKey(end)) {
+        if (visited.containsKey(new Twople(end))) {
             List<MapLocation> finalPath = reconstructPath(start, end, visited);
             System.out.println(finalPath);
             paths.put(unit, finalPath);

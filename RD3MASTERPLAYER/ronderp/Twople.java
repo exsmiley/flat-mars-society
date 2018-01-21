@@ -10,9 +10,7 @@ public class Twople {
     private final Planet planet;
     
     /**
-     * @param x - x
-     * @param y - y
-     * @param planet - planet
+     * @param m - MapLocation m
      */
     public Twople(MapLocation m) {
         this.x = m.getX();

@@ -38,8 +38,9 @@ public class Player {
         Mmap passableMap = output[1]; //map with 1 on passable terrain, 0 on impassible terrain
         
         //List of locations that have karbonite from closets to farthest.
-        ArrayList<MapLocation> kLocs = utils.getKLocs(earth, kMap, startingUnits.get(0).location().mapLocation());
-        
+        if (gc.planet().equals(Planet.Earth)) {
+            ArrayList<MapLocation> kLocs = utils.getKLocs(earth, kMap, startingUnits.get(0).location().mapLocation());
+        }
         
         
         // make sure we can get a rocket
@@ -209,8 +210,8 @@ public class Player {
                                         hasMoved = true;
                                     }
                                     */
-                                    //pathing.findPath(unit, other.location().mapLocation());
-                                    //hasMoved = true;
+                                    pathing.findPath(unit, other.location().mapLocation());
+                                    hasMoved = true;
                                 }
                             }
                             
@@ -226,7 +227,7 @@ public class Player {
                                     gc.moveRobot(id, randomDirection);
                                 }
                                 */
-                                pathing.findPath(unit, new MapLocation(Planet.Earth, 4 ,4));
+                                pathing.findPath(unit, enemyLoc);
                             }
                         }
                     }
