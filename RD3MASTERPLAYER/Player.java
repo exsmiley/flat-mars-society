@@ -254,6 +254,40 @@ public class Player {
                             }
                         }
                     }
+                    
+                    //HEALER LOGIC
+                    else if (unit.unitType().equals(UnitType.Healer)) {
+                    	boolean hasMoved = false;
+                    	Location location = unit.location();
+                    	if (location.isOnMap()) {
+                    		//try healing
+                    		if (unit.attackHeat() < 10) {
+                    			VecUnit nearby = gc.senseNearbyUnitsByTeam(location.mapLocation(), 30, myTeam);
+                    			if (nearby.size() > 0) {
+	                    			int bestId = utils.getLowestHealthId(nearby);
+	                    			if (!(bestId == -1)) {
+	                    				if (gc.canHeal(unit.id(), bestId)) {
+	                    					gc.heal(unit.id(), bestId);
+	                    				}
+	                    			}
+                    			}else if (unit.movementHeat() < 10 && !hasMoved) {
+                    				VecUnit largerNearby = gc.senseNearbyUnitsByTeam(location.mapLocation(), 50, myTeam);
+                    				if (largerNearby.size() > 0) {
+                    					int bestId = utils.getLowestHealthId(largerNearby);
+                    					if (!(bestId == -1)) {
+                    						pathing.moveTo(unit, gc.unit(bestId).location().mapLocation() );
+                    						hasMoved = true;
+                    					}
+                    					
+                    				}else {
+                    					//Move somewhere useful, but no idea where that is
+                    				}
+                    			}
+                    		}
+                    		
+
+                    	}
+                    }
                     } catch(Exception e) {
                         System.out.println(e);
                 }

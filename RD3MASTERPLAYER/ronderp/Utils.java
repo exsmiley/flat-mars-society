@@ -279,4 +279,22 @@ public class Utils {
 		return false;
 	}
 	
+	/**
+	 * Gets the Maplocation of the nearby unit with the least health
+	 * @param nearby A VecUnit of nearby friendly units
+	 * @return The location of the lowest hp unit that is nearby
+	 */
+	public int getLowestHealthId(VecUnit nearby) {
+		int LowestHealth = 1000;
+		int bestUnit = -1;
+		for (int j = 0; j < nearby.size(); j++) {
+			Unit nearbyUnit = nearby.get(j);
+			if (nearbyUnit.health() < LowestHealth && nearbyUnit.unitType().equals(UnitType.Factory) && nearbyUnit.unitType().equals(UnitType.Rocket)) {
+				LowestHealth = (int)nearbyUnit.health();
+				bestUnit = nearbyUnit.id();
+			}
+		}
+		return bestUnit;
+	}
+	
 }
