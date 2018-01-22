@@ -276,6 +276,9 @@ public class Player {
                     					int bestId = utils.getLowestHealthId(largerNearby);
                     					if (!(bestId == -1)) {
                     						pathing.moveTo(unit, gc.unit(bestId).location().mapLocation() );
+                    						if (gc.canHeal(unit.id(), bestId)) {
+                    							gc.heal(unit.id(), bestId);
+                    						}
                     						hasMoved = true;
                     					}
                     					
