@@ -289,7 +289,7 @@ public class Utils {
 		int bestUnit = -1;
 		for (int j = 0; j < nearby.size(); j++) {
 			Unit nearbyUnit = nearby.get(j);
-			if (nearbyUnit.health() < LowestHealth && nearbyUnit.unitType().equals(UnitType.Factory) && nearbyUnit.unitType().equals(UnitType.Rocket)) {
+			if (nearbyUnit.health() < LowestHealth && nearbyUnit.health() < nearbyUnit.maxHealth() && !nearbyUnit.unitType().equals(UnitType.Factory) && !nearbyUnit.unitType().equals(UnitType.Rocket)) {
 				LowestHealth = (int)nearbyUnit.health();
 				bestUnit = nearbyUnit.id();
 			}

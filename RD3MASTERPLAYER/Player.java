@@ -25,6 +25,7 @@ public class Player {
         boolean produceRockets = true;
         boolean produceFactories = true;
         boolean produceRangers = true;
+        boolean produceHealers = true;
         
         // Guess enemy spawn
         VecUnit startingUnits = gc.myUnits();
@@ -77,6 +78,7 @@ public class Player {
             int numOfRockets = 0;
             int numOfWorkers = 0;
             int numOfRangers = 0;
+            int numOfHealers = 0;
             
             if(!canRocket && gc.researchInfo().getLevel(UnitType.Rocket) >= 1) {
                     canRocket = true;
@@ -221,6 +223,11 @@ public class Player {
                                 continue;
                             }
                         }
+                        else if (gc.canProduceRobot(unit.id(), UnitType.Healer) && produceHealers) {
+                        	gc.produceRobot(unit.id(), UnitType.Healer);
+                        	System.out.println("Produced a healer!");
+                        	continue;
+                        }
                         else if (gc.canProduceRobot(unit.id(), toConstruct) && produceRangers) {
                             gc.produceRobot(unit.id(), toConstruct);
                             System.out.println("Produced an attacker!");
@@ -257,6 +264,7 @@ public class Player {
                     
                     //HEALER LOGIC
                     else if (unit.unitType().equals(UnitType.Healer)) {
+                    	numOfHealers++;
                     	boolean hasMoved = false;
                     	Location location = unit.location();
                     	if (location.isOnMap()) {
@@ -276,16 +284,21 @@ public class Player {
                     					int bestId = utils.getLowestHealthId(largerNearby);
                     					if (!(bestId == -1)) {
                     						pathing.moveTo(unit, gc.unit(bestId).location().mapLocation() );
-                    						if (gc.canHeal(unit.id(), bestId)) {
+                    						if (gc.canHeal(unit.id(), bestId) && unit.attackHeat() < 10) {
                     							gc.heal(unit.id(), bestId);
                     						}
                     						hasMoved = true;
                     					}
                     					
                     				}else {
-                    					//Move somewhere useful, but no idea where that is
+                    					pathing.moveTo(unit, enemyLoc);
+                    					hasMoved = true;
                     				}
                     			}
+                    		}
+                    		if (!hasMoved && unit.movementHeat() < 10) {
+            					pathing.moveTo(unit, enemyLoc);
+            					hasMoved = true;
                     		}
                     		
 
@@ -322,7 +335,11 @@ public class Player {
             else {
                 produceWorkers = true;
             }
-            
+            if (numOfHealers >= numOfRangers/8) {
+            	produceHealers = false;
+            }else {
+            	produceHealers = true;
+            }
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }
