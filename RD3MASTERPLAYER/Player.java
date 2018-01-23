@@ -352,7 +352,6 @@ public class Player {
                     }
                     
                     
-                    /*
                     //HEALER LOGIC
                     else if (unit.unitType().equals(UnitType.Healer)) {
                     	numOfHealers++;
@@ -395,7 +394,6 @@ public class Player {
 
                     	    }
                     }
-                    */
                     } catch(Exception e) {
                         System.out.println(e);
                 }
