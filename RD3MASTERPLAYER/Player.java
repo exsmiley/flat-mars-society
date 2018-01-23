@@ -26,6 +26,11 @@ public class Player {
         boolean produceFactories = true;
         boolean produceRangers = true;
         boolean produceHealers = true;
+        boolean produceMages = true;
+        boolean produceKnights = true;
+        
+        // Counter to produce units in mixed order.
+        // int counter = 0;
         
         // Guess enemy spawn
         VecUnit startingUnits = gc.myUnits();
@@ -47,13 +52,13 @@ public class Player {
         }
         
         // make sure we can get a rocket
-        System.out.println("Queuing rocket research: " + gc.queueResearch(UnitType.Rocket));
+        System.out.println("Queuing rocket research: " + gc.queueResearch(UnitType.Rocket)); 
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
-        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
-        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
-        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        //System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        //System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        //System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
         // TODO queue other research
         
         utils.planRocketLaunches();
@@ -79,6 +84,8 @@ public class Player {
             int numOfWorkers = 0;
             int numOfRangers = 0;
             int numOfHealers = 0;
+            int numOfMages = 0;
+            int numOfKnights = 0;
             
             if(!canRocket && gc.researchInfo().getLevel(UnitType.Rocket) >= 1) {
                     canRocket = true;
@@ -91,7 +98,6 @@ public class Player {
                 try {
                     Unit unit = units.get(i);
                     int id = unit.id();
-                    UnitType toConstruct = UnitType.Ranger;
                     
                     
                     //WORKER LOGIC
@@ -223,25 +229,81 @@ public class Player {
                                 continue;
                             }
                         }
+                        
+                        /*
                         else if (gc.canProduceRobot(unit.id(), UnitType.Healer) && produceHealers) {
-                        	gc.produceRobot(unit.id(), UnitType.Healer);
-                        	System.out.println("Produced a healer!");
-                        	continue;
+                            	gc.produceRobot(unit.id(), UnitType.Healer);
+                            	System.out.println("Produced a healer!");
+                            	continue;
                         }
-                        else if (gc.canProduceRobot(unit.id(), toConstruct) && produceRangers) {
-                            gc.produceRobot(unit.id(), toConstruct);
+                        */
+                        /*
+                        else if (gc.canProduceRobot(unit.id(), UnitType.Knight) && produceKnights && counter % 3 == 0) {
+                            gc.produceRobot(unit.id(), UnitType.Knight);
                             System.out.println("Produced an attacker!");
+                            counter++;
                             continue;
                         }
+                        */
+                        
+                        else if (gc.canProduceRobot(unit.id(), UnitType.Ranger) && produceRangers) {
+                            gc.produceRobot(unit.id(), UnitType.Ranger);
+                            System.out.println("Produced an attacker!");
+                            //counter++;
+                            continue;
+                        }
+                        
+                        /*
+                        else if (gc.canProduceRobot(unit.id(), UnitType.Mage) && produceMages && counter % 3 == 2) {
+                            gc.produceRobot(unit.id(), UnitType.Mage);
+                            System.out.println("Produced an attacker!");
+                            counter++;
+                            continue;
+                        }
+                        */
+                        
+                        
                     }
                     
                     //RANGER LOGIC
                     else if (unit.unitType().equals(UnitType.Ranger)) {
                         numOfRangers++;
+                        
                         boolean hasMoved = false;
                         Location location = unit.location();  
                         if (location.isOnMap()) {  
                             VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 50);
+                            for (int j = 0; j < nearby.size(); j++) {
+                                Unit other = nearby.get(j);
+                                if (!other.team().equals(myTeam)) {
+                                    
+                                    if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
+                                        gc.attack(id, other.id());
+                                    }
+                                    else if (unit.movementHeat() < 10) {
+                                        pathing.moveTo(unit, other.location().mapLocation());
+                                        hasMoved = true;
+                                    }                                   
+                                }
+                                if (other.unitType().equals(UnitType.Rocket)) {
+                                    pathing.moveTo(unit, other.location().mapLocation());
+                                    hasMoved = true;
+                                }
+                            }
+                            
+                            if (!hasMoved && unit.movementHeat() < 10) {
+                                pathing.moveTo(unit, enemyLoc);
+                            }
+                        }
+                    }
+                    
+                    //MAGE LOGIC
+                    else if (unit.unitType().equals(UnitType.Mage)) {
+                        numOfMages++;
+                        boolean hasMoved = false;
+                        Location location = unit.location();  
+                        if (location.isOnMap()) {  
+                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
                             for (int j = 0; j < nearby.size(); j++) {
                                 Unit other = nearby.get(j);
                                 if (!other.team().equals(myTeam)) {
@@ -262,6 +324,35 @@ public class Player {
                         }
                     }
                     
+                    //KNIGHT LOGIC
+                    else if (unit.unitType().equals(UnitType.Knight)) {
+                        numOfRangers++;
+                        boolean hasMoved = false;
+                        Location location = unit.location();  
+                        if (location.isOnMap()) {  
+                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
+                            for (int j = 0; j < nearby.size(); j++) {
+                                Unit other = nearby.get(j);
+                                if (!other.team().equals(myTeam)) {
+                                    
+                                    if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
+                                        gc.attack(id, other.id());
+                                    }
+                                    else if (unit.movementHeat() < 10) {
+                                        pathing.moveTo(unit, other.location().mapLocation());
+                                        hasMoved = true;
+                                    }                                   
+                                }
+                            }
+                            
+                            if (!hasMoved && unit.movementHeat() < 10) {
+                                pathing.moveTo(unit, enemyLoc);
+                            }
+                        }
+                    }
+                    
+                    
+                    /*
                     //HEALER LOGIC
                     else if (unit.unitType().equals(UnitType.Healer)) {
                     	numOfHealers++;
@@ -302,8 +393,9 @@ public class Player {
                     		}
                     		
 
-                    	}
+                    	    }
                     }
+                    */
                     } catch(Exception e) {
                         System.out.println(e);
                 }
@@ -311,35 +403,55 @@ public class Player {
             }
             
             // Check whether or not to keep producing each unit.
-            if (numOfRangers > 15) {
+            if (numOfRangers > 25) {
                 produceRangers = false;
             }
             else {
                 produceRangers = true;
             }
+            
+            if (numOfMages > 0) {
+                produceMages = false;
+            }
+            else {
+                produceMages = true;
+            }
+            
+            if (numOfKnights > 0) {
+                produceKnights = false;
+            }
+            else {
+                produceKnights = true;
+            }
+            
             if (numOfRockets > 3) {
                 produceRockets = false;
             }
             else {
                 produceRockets = true;
             }
-            if (numOfFactories > 3) {
+            
+            if (numOfFactories > 5) {
                 produceFactories = false;
             }
             else {
                 produceFactories = true;
             }
+            
             if (numOfWorkers > 5) {
                 produceWorkers = false;
             }
             else {
                 produceWorkers = true;
             }
+            
             if (numOfHealers >= numOfRangers/8) {
-            	produceHealers = false;
-            }else {
-            	produceHealers = true;
+            	    produceHealers = false;
             }
+            else {
+                produceHealers = true;
+            }
+            
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }

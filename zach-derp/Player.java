@@ -1,23 +1,14 @@
-
 // import the API.
 // See xxx for the javadocs.
 import bc.*;
-import zachderp.*;
+import zachderp.SimplePathing;
+import zachderp.Utils;
+import zachderp.Mmap;
+
+import java.util.*;
 
 public class Player {
-	
-    public static void main(String[] args) {
-        // MapLocation is a data structure you'll use a lot.
-        MapLocation loc = new MapLocation(Planet.Earth, 10, 20);
-//        MapLocation locMars = new MapLocation(Planet.Mars, 10, 20);
-//        System.out.println("loc: "+loc+", one step to the Northwest: "+loc.add(Direction.Northwest));
-//        System.out.println("loc x: "+loc.getX());
-//        
-
-        // One slightly weird thing: some methods are currently static methods on a static class called bc.
-        // This will eventually be fixed :/
-//        System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
-
+    public static void main(String[] args) {   
         // Connect to the manager, starting the game
         GameController gc = new GameController();
 
@@ -27,160 +18,389 @@ public class Player {
         PlanetMap mars = gc.startingMap(Planet.Mars);
         
         Team myTeam = gc.team();
-        int turn = 0;
         
-        UnitType[] attackers = new UnitType[] {UnitType.Knight, UnitType.Mage, UnitType.Ranger};
+        // Whether or not to keep producing specific units
+        boolean produceWorkers = true;
+        boolean produceRockets = true;
+        boolean produceFactories = true;
+        boolean produceRangers = true;
+        boolean produceHealers = true;
+        
+        // Guess enemy spawn
+        VecUnit startingUnits = gc.myUnits();
+        MapLocation enemyLoc = new MapLocation(Planet.Earth, 1, 1);
+        if (gc.planet().equals(Planet.Earth)) {
+            MapLocation startLoc = startingUnits.get(0).location().mapLocation();           
+            enemyLoc = utils.invertion(earth, startLoc);
+        }
+        
+        //Fun with maps!
+        Mmap[] output = utils.makeKMapandPassableMap(earth);
+        Mmap kMap = output[0]; //map wiht karbonite values
+        Mmap passableMap = output[1]; //map with 1 on passable terrain, 0 on impassible terrain
+        
+        //List of locations that have karbonite from closets to farthest.
+        ArrayList<MapLocation> kLocs = new ArrayList<MapLocation>();
+        if (gc.planet().equals(Planet.Earth)) {
+            kLocs = utils.getKLocs(earth, kMap, startingUnits.get(0).location().mapLocation());
+        }
         
         // make sure we can get a rocket
         System.out.println("Queuing rocket research: " + gc.queueResearch(UnitType.Rocket));
+        /*
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
         System.out.println("Queuing ranger research: " + gc.queueResearch(UnitType.Ranger));
+        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        System.out.println("Queuing worker research: " + gc.queueResearch(UnitType.Worker));
+        */
         // TODO queue other research
         
-        // rocket stuff maybe TODO
         utils.planRocketLaunches();
-        System.out.println((int) mars.getWidth());
         MapLocation ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
-		while(!mars.onMap(ml)) {
-			ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
-		}
+        while((!mars.onMap(ml)) || mars.isPassableTerrainAt(ml) == 0) {
+            ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
+        }
         
-        boolean hasSomethingQueued = true;
         boolean canRocket = false;
-        boolean hasFactory = false;
         
         // Direction is a normal java enum.
         Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
         
+        // Initialize pathing object to help bois move places
+        SimplePathing pathing = new SimplePathing(mars, earth, gc);
+        
         while (true) {
-            turn += 1;
-//            System.out.println("Current round: "+gc.round());
-//            System.out.println("Rocket level: " + gc.researchInfo().getLevel(UnitType.Rocket));
-//            System.out.println("Ranger level: " + gc.researchInfo().getLevel(UnitType.Ranger));
+            System.out.println("Current round: "+gc.round());
+            
+            // Initialize number of each unit to 0 at beginning of each round.
+            int numOfFactories = 0;
+            int numOfRockets = 0;
+            int numOfWorkers = 0;
+            int numOfRangers = 0;
+            int numOfHealers = 0;
+            
             if(!canRocket && gc.researchInfo().getLevel(UnitType.Rocket) >= 1) {
-            		canRocket = true;
+                    canRocket = true;
             }
-            System.out.println(gc.rocketLandings().toJson());
             
-            int numWorkers = 0;
-            
-            if(hasSomethingQueued && gc.researchInfo().roundsLeft() == 1) {
-            		// TODO queue something new
-            		hasSomethingQueued = false;
-            }
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
             VecUnit units = gc.myUnits();
-            
-//            System.out.println("I have " + units.size() + " units! :)");
 
             for (int i = 0; i < units.size(); i++) {
-            		try {
-	                Unit unit = units.get(i);
-	                int id = unit.id();
-	                UnitType toConstruct = UnitType.Ranger;//Utils.chooseRandom(attackers);
-	                
-	                if(unit.unitType().equals(UnitType.Worker)) {
-	                		numWorkers += 1;
-	                }
-	                
-	                if (unit.unitType().equals(UnitType.Rocket)) {
-//	                		System.out.println("Trying to do something with a rocket..." + unit.health());
-//	                		unit.x
-	                		
-	                	
-	                		if(gc.canLaunchRocket(unit.id(), ml)) {
-		                		gc.launchRocket(unit.id(), ml);
-		                		System.out.println("Launched a rocket to (" + ml.getX() + ", " + ml.getY() + ")");
-		                		ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
-		                		while(!mars.onMap(ml)) {
-		                			ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
-		                		}
-	                		}
-	                }
-	                
-	                else if (unit.unitType().equals(UnitType.Factory)) {
-	                    VecUnitID garrison = unit.structureGarrison();
-	                    if (garrison.size() > 0) {
-	                        Direction d = Utils.chooseRandom(ordinals);
-	                        if (gc.canUnload(unit.id(), d)) {
-	                            System.out.println("Unloaded a unit!");
-	                            gc.unload(unit.id(), d);
-	                            continue;
-	                        }
-	                    }
-	                    else if (gc.canProduceRobot(unit.id(), toConstruct)) {
-	                        gc.produceRobot(unit.id(), toConstruct);
-	                        System.out.println("Produced an attacker!");
-	                        continue;
-	                    }
-	                }
-	
-	                else {
-	                	boolean actedAlready = false;
-	                	// First, look for nearby blueprints to work on.
-	                    Location location = unit.location();
-	                    if (location.isOnMap()) {
-	                    
-	                        VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 	unit.visionRange());
-	                        for (int j = 0; j < nearby.size(); j++) {
-	                            Unit other = nearby.get(j);
-	                            if(!unit.location().isOnMap()) {
-	                            		continue;
-	                            }
-	                            
-	                            if (unit.unitType().equals(UnitType.Worker) && (gc.canBuild(unit.id(), other.id()))) {
-	                                gc.build(unit.id(), other.id());
-	                                System.out.println("Built a factory!");
-	                                // move onto the next unit;
-	                                actedAlready = true;
-	                                continue;
-	                            }
-	                            if (!(other.team().equals(myTeam)) && (gc.isAttackReady(unit.id())) && gc.canAttack(unit.id(), other.id())) {
-	                                System.out.println("Attacked a thing.");
-	                                gc.attack(unit.id(), other.id());
-	                                actedAlready = true;
-	                                continue;
-	                            }
-	                        }
-	                    }
-	                    
-	                    if(actedAlready) {
-	                    		break;
-	                    }
-	                    
-	                		// move and replicate
-	                		if(gc.isMoveReady(id) && Math.random() < 0.85) {
-		                		try {
-		                			utils.moveRobotSpiral(id);
-		                			if(Math.random() < 0.2 && numWorkers < 10) {
-		                				utils.replicateSomewhere(id);
-		                			}
-		                       	
-		                		} catch(Exception e) {
-		                			System.out.println(e);
-		                		}
-	                		} else {
-	                			Direction d = Utils.chooseRandom(ordinals);
-	                			if(canRocket && gc.planet() == Planet.Earth) {
-	                				if ((gc.karbonite() > 100) && (gc.canBlueprint(unit.id(), UnitType.Rocket, d))) {
-		                            gc.blueprint(unit.id(), UnitType.Rocket, d);
-		                            System.out.println("Blueprinted a rocket!");
-		                        }
-	                			} else {
-	                				if (!hasFactory && (gc.karbonite() > 100) && (gc.canBlueprint(unit.id(), UnitType.Factory, d))) {
-		                            gc.blueprint(unit.id(), UnitType.Factory, d);
-		                            hasFactory = true;
-		                        }
-	                			}
-	                		}
-	                
-	
-	                }
-            		} catch(Exception e) {
-                		System.out.println(e);
+                try {
+                    Unit unit = units.get(i);
+                    int id = unit.id();
+                    UnitType toConstruct = UnitType.Ranger;
+                    
+                    
+                    //WORKER LOGIC
+                    if(unit.unitType().equals(UnitType.Worker)) {
+                        numOfWorkers++;
+                        
+                        // First, look for nearby blueprints to work on.
+                        Location location = unit.location();
+                        MapLocation maplocation = unit.location().mapLocation();
+                        
+                        if (location.isOnMap()) {     
+                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
+                            boolean hasMoved = false;
+                            boolean hasActed = false;
+                            for (int j = 0; j < nearby.size(); j++) {
+                                Unit other = nearby.get(j);
+                                
+                                // We don't want to build the enemy factories for them, lol.
+                                if ((other.unitType().equals(UnitType.Factory) || other.unitType().equals(UnitType.Rocket)) && other.team().equals(myTeam) && !hasActed) {
+                                    if (gc.canBuild(id, other.id())) {
+                                        gc.build(unit.id(), other.id());
+                                        // move onto the next unit;
+                                        hasActed = true;
+                                        continue;
+                                    }
+                                    // Walk toward factory to work on it.
+                                    else {
+                                        MapLocation factoryRocketLocation = other.location().mapLocation();
+                                        if (location.mapLocation().distanceSquaredTo(factoryRocketLocation) > 1) {
+                                            Direction directionToWalk = location.mapLocation().directionTo(factoryRocketLocation);
+                                            if (gc.canMove(id, directionToWalk) && unit.movementHeat() < 10 && !hasMoved) {
+                                                gc.moveRobot(id, directionToWalk); // TODO: Change path
+                                                hasMoved = true;
+                                            }
+                                        }
+                                        
+                                        // Otherwise, just chill next to the factory for now.
+                                    }
+                                }
+                                
+                                // Run away from the enemy.
+                                else if (!other.team().equals(myTeam)) {
+                                    MapLocation enemyLocation = other.location().mapLocation();
+                                    Direction directionToWalkAwayFrom = location.mapLocation().directionTo(enemyLocation);
+                                    Direction newDirection = Utils.getOppositeDirection(directionToWalkAwayFrom);
+                                    if (gc.canMove(id, newDirection) && !hasMoved && unit.movementHeat() < 10) {
+                                        gc.moveRobot(id, newDirection); // TODO: Change path
+                                        hasMoved = true;
+                                    }
+                                }
+                            }       
+                            
+                            Direction randomDirection = Utils.chooseRandom(ordinals);
+                            // Replicate yourself
+                            if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10 && !hasActed) {
+                                gc.replicate(id, randomDirection);
+                            }
+                            
+                            // Blueprint a factory                           
+                            else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && produceFactories && !hasActed) {
+                                gc.blueprint(id, UnitType.Factory, randomDirection);
+                            }
+                            
+                            // If not a rocket
+                            else if (canRocket) {
+                                if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && produceRockets && !hasActed) {
+                                    gc.blueprint(id, UnitType.Rocket, randomDirection);
+                                }
+                            }
+                            
+                            // Get Karbonite
+                            else if (!hasActed) {
+                            	//First try adjacent squares
+                            	Direction bestDir = utils.bestKarboniteDirection(earth, maplocation);
+                            	if (gc.karboniteAt(maplocation.add(bestDir)) > 0) {
+                            		if (gc.canHarvest(id, bestDir)) {
+                            			gc.harvest(id, bestDir);
+                            		}
+                            	}
+                            	//Then go to the next closest location
+                            	else if (gc.isMoveReady(id) && gc.planet().equals(Planet.Earth)) {
+									if (kLocs.size() > 0) {
+                            			MapLocation destination = kLocs.get(0);
+                            			if (gc.canSenseLocation(destination)) {
+                            				int kAmt = (int)gc.karboniteAt(destination);
+                            				if (kAmt == 0) {
+                            					kLocs.remove(0);
+                            				}else {
+                            					pathing.moveTo(unit, destination);
+                            				}
+                            			}
+                            		}
+                            	}
+                                utils.harvestSomething(id); 
+                            }
+                            
+                            // Move if you haven't already
+                            if (!hasMoved && unit.movementHeat() < 10) {
+                                if (gc.canMove(id, randomDirection)) {
+                                    gc.moveRobot(id, randomDirection); // TODO: Change path
+                                }
+                            }
+                            
+                        }
+                    }
+                    
+                    //ROCKET LOGIC
+                    else if (unit.unitType().equals(UnitType.Rocket)) { 
+                        numOfRockets++;
+                        if(gc.canLaunchRocket(id, ml)) {
+                            gc.launchRocket(id, ml);
+                            System.out.println("Launched a rocket to (" + ml.getX() + ", " + ml.getY() + ")");
+                            ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
+                            while(!mars.onMap(ml) || mars.isPassableTerrainAt(ml) == 0) {
+                                ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
+                            }
+                        }
+                    }
+                    
+                    //FACTORY LOGIC
+                    else if (unit.unitType().equals(UnitType.Factory)) {
+                        numOfFactories++;
+                        VecUnitID garrison = unit.structureGarrison();
+                        if (garrison.size() > 0) {
+                            Direction d = Utils.chooseRandom(ordinals);
+                            if (gc.canUnload(unit.id(), d)) {
+                                System.out.println("Unloaded a unit!");
+                                gc.unload(unit.id(), d);
+                                continue;
+                            }
+                        }
+                        
+                        /*
+                        else if (gc.canProduceRobot(unit.id(), UnitType.Healer) && produceHealers) {
+                            	gc.produceRobot(unit.id(), UnitType.Healer);
+                            	System.out.println("Produced a healer!");
+                            	continue;
+                        }
+                        */
+                        
+                        else if (gc.canProduceRobot(unit.id(), toConstruct) && produceRangers) {
+                            gc.produceRobot(unit.id(), toConstruct);
+                            System.out.println("Produced an attacker!");
+                            continue;
+                        }
+                    }
+                    
+                    //RANGER LOGIC
+                    else if (unit.unitType().equals(UnitType.Ranger)) {
+                        numOfRangers++;
+                        boolean hasMoved = false;
+                        Location location = unit.location();  
+                        if (location.isOnMap()) {  
+                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 50);
+                            for (int j = 0; j < nearby.size(); j++) {
+                                Unit other = nearby.get(j);
+                                if (!other.team().equals(myTeam)) {
+                                    
+                                    if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
+                                        gc.attack(id, other.id());
+                                    }
+                                    else if (unit.movementHeat() < 10) {
+                                        pathing.moveTo(unit, other.location().mapLocation());
+                                        hasMoved = true;
+                                    }                                   
+                                }
+                            }
+                            
+                            if (!hasMoved && unit.movementHeat() < 10) {
+                                pathing.moveTo(unit, enemyLoc);
+                            }
+                        }
+                    }
+                    
+                    //MAGE LOGIC
+                    else if (unit.unitType().equals(UnitType.Mage)) {
+                        numOfRangers++;
+                        boolean hasMoved = false;
+                        Location location = unit.location();  
+                        if (location.isOnMap()) {  
+                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
+                            for (int j = 0; j < nearby.size(); j++) {
+                                Unit other = nearby.get(j);
+                                if (!other.team().equals(myTeam)) {
+                                    
+                                    if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
+                                        gc.attack(id, other.id());
+                                    }
+                                    else if (unit.movementHeat() < 10) {
+                                        pathing.moveTo(unit, other.location().mapLocation());
+                                        hasMoved = true;
+                                    }                                   
+                                }
+                            }
+                            
+                            if (!hasMoved && unit.movementHeat() < 10) {
+                                pathing.moveTo(unit, enemyLoc);
+                            }
+                        }
+                    }
+                    
+                    //KNIGHT LOGIC
+                    else if (unit.unitType().equals(UnitType.Knight)) {
+                        numOfRangers++;
+                        boolean hasMoved = false;
+                        Location location = unit.location();  
+                        if (location.isOnMap()) {  
+                            VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
+                            for (int j = 0; j < nearby.size(); j++) {
+                                Unit other = nearby.get(j);
+                                if (!other.team().equals(myTeam)) {
+                                    
+                                    if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
+                                        gc.attack(id, other.id());
+                                    }
+                                    else if (unit.movementHeat() < 10) {
+                                        pathing.moveTo(unit, other.location().mapLocation());
+                                        hasMoved = true;
+                                    }                                   
+                                }
+                            }
+                            
+                            if (!hasMoved && unit.movementHeat() < 10) {
+                                pathing.moveTo(unit, enemyLoc);
+                            }
+                        }
+                    }
+                    
+                    
+                    /*
+                    //HEALER LOGIC
+                    else if (unit.unitType().equals(UnitType.Healer)) {
+                    	numOfHealers++;
+                    	boolean hasMoved = false;
+                    	Location location = unit.location();
+                    	if (location.isOnMap()) {
+                    		//try healing
+                    		if (unit.attackHeat() < 10) {
+                    			VecUnit nearby = gc.senseNearbyUnitsByTeam(location.mapLocation(), 30, myTeam);
+                    			if (nearby.size() > 0) {
+	                    			int bestId = utils.getLowestHealthId(nearby);
+	                    			if (!(bestId == -1)) {
+	                    				if (gc.canHeal(unit.id(), bestId)) {
+	                    					gc.heal(unit.id(), bestId);
+	                    				}
+	                    			}
+                    			}else if (unit.movementHeat() < 10 && !hasMoved) {
+                    				VecUnit largerNearby = gc.senseNearbyUnitsByTeam(location.mapLocation(), 50, myTeam);
+                    				if (largerNearby.size() > 0) {
+                    					int bestId = utils.getLowestHealthId(largerNearby);
+                    					if (!(bestId == -1)) {
+                    						pathing.moveTo(unit, gc.unit(bestId).location().mapLocation() );
+                    						if (gc.canHeal(unit.id(), bestId) && unit.attackHeat() < 10) {
+                    							gc.heal(unit.id(), bestId);
+                    						}
+                    						hasMoved = true;
+                    					}
+                    					
+                    				}else {
+                    					pathing.moveTo(unit, enemyLoc);
+                    					hasMoved = true;
+                    				}
+                    			}
+                    		}
+                    		if (!hasMoved && unit.movementHeat() < 10) {
+            					pathing.moveTo(unit, enemyLoc);
+            					hasMoved = true;
+                    		}
+                    		
+
+                    	    }
+                    }
+                    */
+                    } catch(Exception e) {
+                        System.out.println(e);
                 }
                 
+            }
+            
+            // Check whether or not to keep producing each unit.
+            if (numOfRangers > 20) {
+                produceRangers = false;
+            }
+            else {
+                produceRangers = true;
+            }
+            if (numOfRockets > 3) {
+                produceRockets = false;
+            }
+            else {
+                produceRockets = true;
+            }
+            if (numOfFactories > 5) {
+                produceFactories = false;
+            }
+            else {
+                produceFactories = true;
+            }
+            if (numOfWorkers > 5) {
+                produceWorkers = false;
+            }
+            else {
+                produceWorkers = true;
+            }
+            if (numOfHealers >= numOfRangers/8) {
+            	produceHealers = false;
+            }else {
+            	produceHealers = true;
             }
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
