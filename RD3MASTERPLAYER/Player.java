@@ -441,11 +441,14 @@ public class Player {
                                 }
                             	
                             	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
-                            	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
-                            		if (gc.canHarvest(id, bestDir)) {
-                            			gc.harvest(id, bestDir);
-                            		}
+                            	if (bestDir != null){
+                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
+                                		if (gc.canHarvest(id, bestDir)) {
+                                			gc.harvest(id, bestDir);
+                                		}
+                                	}                            		
                             	}
+
                             	
                                 
                                 if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10 && unit.location().isOnPlanet(Planet.Mars))  {
