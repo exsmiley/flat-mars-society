@@ -176,7 +176,7 @@ public class Player {
                                 }
                                 
                                 // Get Karbonite
-                                /*
+                                
                                 else if (!hasActed) {
                                 	//First try adjacent squares/*
                                 	Direction bestDir = utils.bestKarboniteDirection(earth, maplocation);
@@ -203,7 +203,6 @@ public class Player {
                                 	
                                     utils.harvestSomething(id); 
                                 }
-                                */
 
                                 // Move if you haven't already
                                 if (!hasMoved && unit.movementHeat() < 10) {
