@@ -124,7 +124,13 @@ public class Player {
                                             hasActed = true;
                                             continue;
                                         }
-                                        // Walk toward factory to work on it.
+                                        
+                                        else if (gc.canLoad(other.id(), id)) {
+                                            gc.load(other.id(), id);
+                                            continue;
+                                        }
+                                        
+                                        // Walk toward factory/Rocket to work on it.
                                         else {
                                             MapLocation factoryRocketLocation = other.location().mapLocation();
                                             if (location.mapLocation().distanceSquaredTo(factoryRocketLocation) > 1) {
@@ -208,7 +214,7 @@ public class Player {
                         //ROCKET LOGIC
                         else if (unit.unitType().equals(UnitType.Rocket)  && unit.location().mapLocation().getPlanet().equals(Planet.Earth)) { 
                             numOfRockets++;
-                            if(gc.canLaunchRocket(id, ml)) {
+                            if(gc.canLaunchRocket(id, ml) && unit.structureGarrison().size() >= 6) {
                                 gc.launchRocket(id, ml);
                                 System.out.println("Launched a rocket to (" + ml.getX() + ", " + ml.getY() + ")");
                                 ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
@@ -269,13 +275,17 @@ public class Player {
                         //RANGER LOGIC
                         else if (unit.unitType().equals(UnitType.Ranger)  && unit.location().mapLocation().getPlanet().equals(Planet.Earth)) {
                             numOfRangers++;
-                            
+                            boolean hasLoaded = false;
                             boolean hasMoved = false;
                             Location location = unit.location();  
                             if (location.isOnMap()) {  
                                 VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 50);
                                 for (int j = 0; j < nearby.size(); j++) {
                                     Unit other = nearby.get(j);
+                                    if (hasLoaded) {
+                                        break;
+                                    }
+                                    
                                     if (!other.team().equals(myTeam)) {
                                         
                                         if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
@@ -286,13 +296,22 @@ public class Player {
                                             hasMoved = true;
                                         }                                   
                                     }
+                                    
                                     if (other.unitType().equals(UnitType.Rocket)) {
-                                        pathing.moveTo(unit, other.location().mapLocation());
-                                        hasMoved = true;
+                                        if (location.mapLocation().distanceSquaredTo(other.location().mapLocation()) <= 1) {
+                                            if (gc.canLoad(other.id(), id)) {
+                                                gc.load(other.id(), id);
+                                                continue;
+                                            }
+                                        }
+                                        else {
+                                            pathing.moveTo(unit, other.location().mapLocation());
+                                            hasMoved = true;
+                                        }
                                     }
                                 }
                                 
-                                if (!hasMoved && unit.movementHeat() < 10) {
+                                if (!hasMoved && unit.movementHeat() < 10 && !hasLoaded) {
                                     pathing.moveTo(unit, enemyLoc);
                                 }
                             }
@@ -399,7 +418,51 @@ public class Player {
                     
                     // We on Mars.
                     else {
-                        
+                        if (unit.location().mapLocation().getPlanet().equals(Planet.Mars)) {
+                            if (unit.unitType().equals(UnitType.Worker)) {
+                                Direction randomDirection = Utils.chooseRandom(ordinals);
+                                if (gc.canMove(id, randomDirection)) {
+                                    gc.moveRobot(id, randomDirection); // TODO: Change path
+                                }
+                            }
+                            
+                            else if (unit.unitType().equals(UnitType.Rocket)) {
+                                Direction randomDirection = Utils.chooseRandom(ordinals);
+                                if (gc.canUnload(id, randomDirection)) {
+                                    gc.unload(id, randomDirection);
+                                }
+                            }
+                            
+                            else if (unit.unitType().equals(UnitType.Ranger)) {
+                                numOfRangers++;
+                                boolean hasMoved = false;
+                                Location location = unit.location();  
+                                if (location.isOnMap()) {  
+                                    VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), 50);
+                                    for (int j = 0; j < nearby.size(); j++) {
+                                        Unit other = nearby.get(j);
+                                        
+                                        if (!other.team().equals(myTeam)) {
+                                            
+                                            if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
+                                                gc.attack(id, other.id());
+                                            }
+                                            else if (unit.movementHeat() < 10) {
+                                                pathing.moveTo(unit, other.location().mapLocation());
+                                                hasMoved = true;
+                                            }                                   
+                                        }
+                                    }
+                                    
+                                    if (!hasMoved && unit.movementHeat() < 10) {
+                                        Direction randomDirection = Utils.chooseRandom(ordinals);
+                                        if (gc.canMove(id, randomDirection)) {
+                                            gc.moveRobot(id, randomDirection); // TODO: Change path
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     
                     } catch(Exception e) {
