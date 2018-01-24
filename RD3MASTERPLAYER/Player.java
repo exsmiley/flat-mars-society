@@ -421,9 +421,27 @@ public class Player {
                     
                     // We on Mars.
                     else {
+                    	
                         if (unit.location().mapLocation().getPlanet().equals(Planet.Mars)) {
+                        	
+                        	//WORKER LOGIC
                             if (unit.unitType().equals(UnitType.Worker)) {
-                                Direction randomDirection = Utils.chooseRandom(ordinals);
+                            	
+                            	Direction randomDirection = Utils.chooseRandom(ordinals);
+                            	
+                                // Replicate yourself
+                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
+                                    gc.replicate(id, randomDirection);
+                                }
+                            	
+                            	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
+                            	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
+                            		if (gc.canHarvest(id, bestDir)) {
+                            			gc.harvest(id, bestDir);
+                            		}
+                            	}
+                            	
+                                
                                 if (gc.canMove(id, randomDirection)) {
                                     gc.moveRobot(id, randomDirection); // TODO: Change path
                                 }
@@ -510,7 +528,7 @@ public class Player {
                 produceFactories = true;
             }
             
-            if (numOfWorkers > 5) {
+            if (numOfWorkers > 5 && gc.round() < 750) {
                 produceWorkers = false;
             }
             else {
