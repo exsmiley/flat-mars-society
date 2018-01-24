@@ -98,6 +98,7 @@ public class Player {
                 try {
                     Unit unit = units.get(i);
                     int id = unit.id();
+                    
                     if (gc.planet().equals(Planet.Earth)) {
                     
                     
@@ -125,7 +126,7 @@ public class Player {
                                             continue;
                                         }
                                         
-                                        else if (gc.canLoad(other.id(), id)) {
+                                        else if (gc.canLoad(other.id(), id) && other.unitType().equals(UnitType.Rocket)) {
                                             gc.load(other.id(), id);
                                             continue;
                                         }
@@ -304,10 +305,12 @@ public class Player {
                                                 continue;
                                             }
                                         }
+                                        /*
                                         else {
                                             pathing.moveTo(unit, other.location().mapLocation());
                                             hasMoved = true;
                                         }
+                                        */
                                     }
                                 }
                                 
