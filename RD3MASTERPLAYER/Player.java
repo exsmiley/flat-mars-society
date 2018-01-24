@@ -439,8 +439,8 @@ public class Player {
                             	}
                             	
                                 
-                                if (gc.canMove(id, randomDirection)) {
-                                    gc.moveRobot(id, randomDirection); // TODO: Change path
+                                if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10 && unit.location().isOnPlanet(Planet.Mars))  {
+                                    gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
                                 }
                             }
                             
