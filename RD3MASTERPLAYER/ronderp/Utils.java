@@ -209,7 +209,7 @@ public class Utils {
 	 */
 	public Direction bestKarboniteDirection(PlanetMap earth, MapLocation loc) {
 		int mostK = 0;
-		Direction bestDir = null;
+		Direction bestDir = Direction.North;
 		Direction[] directions = {Direction.North, Direction.Northeast, Direction.East, Direction.Southeast, Direction.South, Direction.Southwest, Direction.West, Direction.Northwest, Direction.Center};
 		for (Direction dir : directions) {
 			int newK = 0;
