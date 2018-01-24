@@ -195,7 +195,10 @@ public class Player {
                                 				if (kAmt == 0) {
                                 					kLocs.remove(0);
                                 				}else {
-                                					pathing.moveTo(unit, destination);
+                                					if (unit.movementHeat() < 10 && !hasMoved) {
+                                						pathing.moveTo(unit, destination);
+                                						hasMoved = true;
+                                					}
                                 				}
                                 			}
                                 		}
@@ -435,25 +438,32 @@ public class Player {
                             	
                             	Direction randomDirection = Utils.chooseRandom(ordinals);
                             	
-                                // Replicate yourself
-                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
-                                    gc.replicate(id, randomDirection);
-                                }
                             	
                             	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
                             	if (bestDir != null){
-                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
-                                		if (gc.canHarvest(id, bestDir)) {
-                                			gc.harvest(id, bestDir);
-                                		}
+                            		if (utils.onEarth(mars, unit.location().mapLocation().add(bestDir))) {
+	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
+	                                		if (gc.canHarvest(id, bestDir)) {
+	                                			gc.harvest(id, bestDir);
+	                                		}
+	                                	}
                                 	}                            		
                             	}
 
-                            	
+                                // Replicate yourself
+                            	if (utils.onEarth(mars,unit.location().mapLocation().add(randomDirection))) {
+	                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
+	                                    gc.replicate(id, randomDirection);
+	                                }
+                            	}
                                 
-                                if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10 && unit.location().isOnPlanet(Planet.Mars))  {
-                                    gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
-                                }                    
+                            	randomDirection = Utils.chooseRandom(ordinals);
+                            	if (utils.onEarth(mars,unit.location().mapLocation().add(randomDirection))) {
+                                    if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10)  {
+                                        gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
+                                    }   
+                            	}
+                 
                             }
                             
                             else if (unit.unitType().equals(UnitType.Rocket)) {
