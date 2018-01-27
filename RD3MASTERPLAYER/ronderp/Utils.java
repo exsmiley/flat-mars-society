@@ -299,7 +299,7 @@ public class Utils {
 		boolean foundDir = false;
 		while (!foundDir) {
 			tempDir = arrayListRandom(directions);
-			if (gc.canMove(unit.id(), tempDir) && onEarth(planet, unit.location().mapLocation())) {
+			if (gc.canMove(unit.id(), tempDir) && planet.onMap(unit.location().mapLocation())) {
 				foundDir = true;
 				return tempDir;
 			}else {

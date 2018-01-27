@@ -441,7 +441,7 @@ public class Player {
                             	
                             	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
                             	if (bestDir != null){
-                            		if (utils.onEarth(mars, unit.location().mapLocation().add(bestDir))) {
+                            		if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
 	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
 	                                		if (gc.canHarvest(id, bestDir)) {
 	                                			gc.harvest(id, bestDir);
@@ -451,18 +451,26 @@ public class Player {
                             	}
 
                                 // Replicate yourself
-                            	if (utils.onEarth(mars,unit.location().mapLocation().add(randomDirection))) {
+                            	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
 	                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
 	                                    gc.replicate(id, randomDirection);
 	                                }
                             	}
-                                
+                            	
+                              
+                            	if (unit.movementHeat() < 10) {
+                            		Direction bestRanDir = utils.smartDirection(mars, unit);
+                            		gc.moveRobot(unit.id(), bestRanDir);
+                            	}
+                            	
+                            	
                             	randomDirection = Utils.chooseRandom(ordinals);
-                            	if (utils.onEarth(mars,unit.location().mapLocation().add(randomDirection))) {
+                            	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
                                     if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10)  {
                                         gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
                                     }   
                             	}
+                            	
                  
                             }
                             
