@@ -6,6 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+/*
+ * HOW TO USE:
+ * Initialize a Pathing object in the form Astar x = new Astar(PlanetMap mars, PlanetMap earth, GameController gc); OUTSIDE OF THE LOOP THAT IS YOUR TURN.
+ * This object stores all the paths for all you bots.
+ * 
+ * To move or create a path,  call x.moveTo(int unitID, MapLocation start, MapLocation end). IT IS THE SAME FUNCTION TO MOVE A BOT AND GENERATE A PATH. IF THE ROBOT HAS A PATH IT MOVES, IF NOT IT MAKES ONE
+ * AND MOVES. If you want to make a new path just call moveTo(unitID, start, end) with a different end.
+ */
+
 public class Astar 
 {
 	public static GameController gc;
@@ -13,32 +22,22 @@ public class Astar
 	public static HashMap<Integer, ArrayList<Direction>> paffs = new HashMap<Integer, ArrayList<Direction>>();
 	public static HashMap<Integer, MapLocation> ends = new HashMap<Integer, MapLocation>();
 	
-	public Astar(PlanetMap mars, PlanetMap earth, GameController gc)
+	//input earth, mars, gameController
+	public Astar(PlanetMap m, PlanetMap e, GameController g)
 	{
-		this.gc = gc;
-		this.mars = mars;
-		this.earth = earth;
+		gc = g;
+		mars = m;
+		earth = e;
 	}
 	
+	//calculates least possible cost to end for heuristic
 	public static int costToEnd(MapLocation current, MapLocation end)
 	{
 		return (int) Math.sqrt(current.distanceSquaredTo(end));
 	}
 	
-//	public Direction reverseDir(Direction dir)
-//	{
-//		if (dir.equals(Direction.North)) return Direction.South;
-//		else if (dir.equals(Direction.Northeast)) return Direction.Southwest;
-//		else if (dir.equals(Direction.East)) return Direction.West;
-//		else if (dir.equals(Direction.Southeast)) return Direction.Northwest;
-//		else if (dir.equals(Direction.South)) return Direction.North;
-//		else if (dir.equals(Direction.Southwest)) return Direction.Northeast;
-//		else if (dir.equals(Direction.West)) return Direction.East;
-//		else if (dir.equals(Direction.Northwest)) return Direction.Southeast;
-//		else return Direction.Center;
-//	}
-	
-	public static ArrayList<Direction> toDirList(HashMap<Twople, Twople> costs, MapLocation start, Twople end)
+	//changes path of MapLocations to Dirs for easier moving
+	public static ArrayList<Direction> toDirList(HashMap<Twople, Twople> p, MapLocation start, Twople end)
 	{
 		boolean atStartOfPath = false;
 		ArrayList<Direction> path = new ArrayList<Direction>();
@@ -46,27 +45,32 @@ public class Astar
 		
 		while (!atStartOfPath)
 		{
-			MapLocation oldloc = costs.get(check).getMapLocation();
-			if (oldloc.equals(start)) atStartOfPath = true;
+			MapLocation oldloc = p.get(check).getMapLocation();
+			atStartOfPath = oldloc.equals(start);
 			Direction dir = oldloc.directionTo(check.getMapLocation());
 			path.add(0, dir);
+			check = new Twople(oldloc);
 		}
 		
 		return path;
 	}
 	
-	public static boolean findPath(PlanetMap marsMap, PlanetMap earthMap, int id, MapLocation start, MapLocation end)
+	//finds path to end
+	public static boolean findPath(int id, MapLocation start, MapLocation end)
 	{
+		//Finds which planet and returns false is wrong/bad start or end loc
 		PlanetMap map;
 		
 		if (start.getPlanet()!=end.getPlanet()) return false;
-		else if (start.getPlanet()==Planet.Earth) map = earthMap;
-		else map = marsMap;
+		else if (start.getPlanet()==Planet.Earth) map = earth;
+		else map = mars;
 		
-		if ((int) (map.isPassableTerrainAt(start))==0 || (int)(map.isPassableTerrainAt(end))==0) return false;
+		if ((int) (map.isPassableTerrainAt(start))==0 || (int) (map.isPassableTerrainAt(end))==0) return false;
 		
+		//adds id to list of units with paths
 		ends.put(id, end);
 		
+		//generates array of dirs w/o center
 		Direction[] directions = new Direction[8];
 		int count = 0;
 		for (Direction d : Direction.values())
@@ -75,18 +79,24 @@ public class Astar
 			count++;
 		}
 		
+		//makes PriorityQueue that ranks tiles by the sum cost to that tile and straight path to end 
 		Comparator<Loc> comparator = new LocComparator();
 		PriorityQueue<Loc> q = new PriorityQueue<Loc>(1, comparator);
 		
+		//HashMap that stores cost to spot
 		HashMap<Twople, Integer> costs = new HashMap<Twople, Integer>();
+
+		//HashMap that stores the tile that came before each tile in the best path
 		HashMap<Twople, Twople> path = new HashMap<Twople, Twople>();
 		
+		//adds start to iterables
 		Loc s = new Loc(start, 0);
 		q.add(s);
 		Twople startTwople =new Twople(start);
 		costs.put(startTwople, 0);
 		
 		Twople e = new Twople(end);
+
 		while(!(costs.containsKey(e)))
 		{
 			Loc curr = q.peek();
@@ -130,23 +140,8 @@ public class Astar
 		return true;
 	}
 	
-	
-//	public static boolean randomWalk(int id)
-//	{
-//		for (Direction d : direx)
-//		{
-//			if (gc.canMove(id, d))
-//			{
-//				gc.moveRobot(id, d);
-//				return true;
-//			}
-//		}
-//		
-//		return false;
-//	}
-
-	
-	public boolean moveTo(PlanetMap marsMap, PlanetMap earthMap, int id, MapLocation start, MapLocation end)
+	//If has path and can move, moves. Else makes path and moves.
+	public boolean moveTo(int id, MapLocation start, MapLocation end)
 	{
 		if(ends.containsKey(id))
 		{
@@ -154,8 +149,8 @@ public class Astar
 			
 			if (!(ends.get(id).equals(end)))
 			{
-				findPath(marsMap, earthMap, id, start, end);
-				moveTo(marsMap, earthMap, id, start, end);
+				findPath(id, start, end);
+				moveTo(id, start, end);
 			}
 			
 			else if (!(paff.isEmpty()))
@@ -176,8 +171,8 @@ public class Astar
 		
 		else
 		{
-			findPath(marsMap, earthMap, id, start, end);
-			moveTo(marsMap, earthMap, id, start, end);
+			findPath(id, start, end);
+			moveTo(id, start, end);
 		}
 		
 		return false;
