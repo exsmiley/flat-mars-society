@@ -452,25 +452,17 @@ public class Player {
                                 	}
     
                                 // Replicate yourself
-                                	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
-                                    if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
-                                        gc.replicate(id, randomDirection);
-                                    }
+                                	if (unit.abilityHeat() < 10 && produceWorkers) {
+                                		Direction bestRanDir = utils.smartDirection(mars, unit);
+                                		if (gc.canReplicate(unit.id(), bestRanDir)) {
+                                			gc.replicate(unit.id(), bestRanDir);
+                                		}
                                 	}
-                                	
-                                  
                                 	if (unit.movementHeat() < 10) {
                                 		Direction bestRanDir = utils.smartDirection(mars, unit);
                                 		gc.moveRobot(unit.id(), bestRanDir);
                                 	}
                                 	
-                                	
-                                	randomDirection = Utils.chooseRandom(ordinals);
-                                	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
-                                        if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10)  {
-                                            gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
-                                        }   
-                                	}
                  
                             }
                             
@@ -502,10 +494,8 @@ public class Player {
                                     }
                                     
                                     if (!hasMoved && unit.movementHeat() < 10) {
-                                        Direction randomDirection = Utils.chooseRandom(ordinals);
-                                        if (gc.canMove(id, randomDirection)) {
-                                            gc.moveRobot(id, randomDirection); // TODO: Change path
-                                        }
+                                    	Direction bestRanDir = utils.smartDirection(mars, unit);
+                                        gc.moveRobot(unit.id(), bestRanDir);
                                     }
                                 }
                             }
