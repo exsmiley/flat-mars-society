@@ -157,21 +157,21 @@ public class Player {
                                     }
                                 }
                                 
-                                Direction randomDirection = Utils.chooseRandom(ordinals);
+                                Direction bestRandomDirection = utils.smartDirection(earth, unit);
                                 // Replicate yourself
-                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10 && !hasActed) {
-                                    gc.replicate(id, randomDirection);
+                                if (gc.canReplicate(id, bestRandomDirection) && produceWorkers && unit.abilityHeat() < 10 && !hasActed) {
+                                    gc.replicate(id, bestRandomDirection);
                                 }
                                 
                                 // Blueprint a factory                           
-                                else if (gc.canBlueprint(id, UnitType.Factory, randomDirection) && produceFactories && !hasActed) {
-                                    gc.blueprint(id, UnitType.Factory, randomDirection);
+                                else if (gc.canBlueprint(id, UnitType.Factory, bestRandomDirection) && produceFactories && !hasActed) {
+                                    gc.blueprint(id, UnitType.Factory, bestRandomDirection);
                                 }
                                 
                                 // If not a rocket
                                 else if (canRocket) {
-                                    if (gc.canBlueprint(id, UnitType.Rocket, randomDirection) && produceRockets && !hasActed) {
-                                        gc.blueprint(id, UnitType.Rocket, randomDirection);
+                                    if (gc.canBlueprint(id, UnitType.Rocket, bestRandomDirection) && produceRockets && !hasActed) {
+                                        gc.blueprint(id, UnitType.Rocket, bestRandomDirection);
                                     }
                                 }
                                 
@@ -209,9 +209,9 @@ public class Player {
 
                                 // Move if you haven't already
                                 if (!hasMoved && unit.movementHeat() < 10) {
-                                    if (gc.canMove(id, randomDirection)) {
-                                        gc.moveRobot(id, randomDirection); // TODO: Change path
-                                    }
+                                	Direction bestRanDir = utils.smartDirection(earth, unit);
+                                    gc.moveRobot(id, bestRanDir); // TODO: Change path
+                                    
                                 }
                                
                             }
