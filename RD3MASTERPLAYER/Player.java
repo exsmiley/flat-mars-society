@@ -109,7 +109,7 @@ public class Player {
                             Location location = unit.location();
                             MapLocation maplocation = unit.location().mapLocation();
                             
-                            if (location.isOnMap()) {     
+                            if (location.isOnMap()) {   
                                 VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
                                 boolean hasMoved = false;
                                 boolean hasActed = false;
@@ -155,7 +155,7 @@ public class Player {
                                             hasMoved = true;
                                         }
                                     }
-                                }  
+                                }
                                 
                                 Direction randomDirection = Utils.chooseRandom(ordinals);
                                 // Replicate yourself
@@ -178,12 +178,12 @@ public class Player {
                                 // Get Karbonite
                                 
                                 else if (!hasActed) {
-                                	//First try adjacent squares/*
-                                	Direction bestDir = utils.bestKarboniteDirection(earth, maplocation);
-                                	if (gc.karboniteAt(maplocation.add(bestDir)) > 0) {
-                                		if (gc.canHarvest(id, bestDir)) {
-                                			gc.harvest(id, bestDir);
-                                		}
+                                    	//First try adjacent squares/*
+                                    	Direction bestDir = utils.bestKarboniteDirection(earth, maplocation);
+                                    	if (gc.karboniteAt(maplocation.add(bestDir)) > 0) {
+                                    		if (gc.canHarvest(id, bestDir)) {
+                                    			gc.harvest(id, bestDir);
+                                    		}
                                 	}
                                 	//Then go to the next closest location
                                 	
@@ -215,6 +215,7 @@ public class Player {
                                 }
                                
                             }
+                            
                         }
                         
                         
@@ -435,34 +436,33 @@ public class Player {
                         	
                         	//WORKER LOGIC
                             if (unit.unitType().equals(UnitType.Worker)) {
-                            	
-                            	Direction randomDirection = Utils.chooseRandom(ordinals);
-                            	
-                            	
-                            	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
-                            	if (bestDir != null){
-                            		if (utils.onEarth(mars, unit.location().mapLocation().add(bestDir))) {
-	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
-	                                		if (gc.canHarvest(id, bestDir)) {
-	                                			gc.harvest(id, bestDir);
-	                                		}
-	                                	}
-                                	}                            		
-                            	}
-
-                                // Replicate yourself
-                            	if (utils.onEarth(mars,unit.location().mapLocation().add(randomDirection))) {
-	                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
-	                                    gc.replicate(id, randomDirection);
-	                                }
-                            	}
-                                
-                            	randomDirection = Utils.chooseRandom(ordinals);
-                            	if (utils.onEarth(mars,unit.location().mapLocation().add(randomDirection))) {
-                                    if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10)  {
-                                        gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
-                                    }   
-                            	}
+                                	Direction randomDirection = Utils.chooseRandom(ordinals);
+                                	
+                                	
+                                	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
+                                	if (bestDir != null){
+                                		if (mars.onMap(unit.location().mapLocation().add(bestDir))) {
+    	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
+    	                                		if (gc.canHarvest(id, bestDir)) {
+    	                                			gc.harvest(id, bestDir);
+    	                                		}
+    	                                	}
+                                    	}                            		
+                                	}
+    
+                                    // Replicate yourself
+                                	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
+    	                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
+    	                                    gc.replicate(id, randomDirection);
+    	                                }
+                                	}
+                                    
+                                	randomDirection = Utils.chooseRandom(ordinals);
+                                	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
+                                        if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10)  {
+                                            gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
+                                        }   
+                                	}
                  
                             }
                             
