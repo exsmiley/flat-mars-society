@@ -30,29 +30,7 @@ public class Player
             {
                 Unit unit = units.get(i);
                 
-                if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), Direction.Southeast)) 
-                {
-                    gc.moveRobot(unit.id(), Direction.Southeast);
-                }
                 
-                else if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), Direction.Northwest)) 
-                {
-                    gc.moveRobot(unit.id(), Direction.Northwest);
-                }
-            
-                if (gc.canBlueprint(unit.id(), UnitType.Factory, Direction.North))
-                {
-                		System.out.println("Can Blueprint");
-                		gc.blueprint(unit.id(), UnitType.Factory, Direction.North);
-                }
-                
-                try 
-                {
-                		for (int x = 0; x<101; x++)
-                		{
-                			gc.build(unit.id(), x);
-                		}
-                } catch (Exception e) {}
                 
 
                 // Most methods on gc take unit IDs, instead of the unit objects themselves.

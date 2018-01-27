@@ -2,7 +2,6 @@ import java.util.PriorityQueue;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import MapLocationComparator; //HOW THE FUCK DO YOU IMPORT THIS SHIT???
 import java.util.Comparator;
 import bc.*;
 
@@ -27,43 +26,17 @@ import bc.*;
 
 public class Pathing 
 {
-	public static GameController gc = new GameController();
+	public static GameController gc;
 	public static PlanetMap earth, mars;
 	public static Map<Unit, ArrayList<MapLocation>> paths = new HashMap<Unit, ArrayList<MapLocation>>();
 	
-	public Pathing(VecUnit units, PlanetMap mars, PlanetMap earth)
+	public Pathing(PlanetMap mars, PlanetMap earth, GameController gc)
 	{
+		this.gc = gc;
 		this.earth = earth;
 		this.mars = mars;
 		Map<Unit, ArrayList<MapLocation>> paths = new HashMap<Unit, ArrayList<MapLocation>>();
 		this.paths = paths;
-	}
-	
-	//This is useless. Pls ignore.
-	public static Direction[] getDirs()
-	{
-		Direction[] directions = new Direction[8];
-		for (Direction d : Direction.values())
-		{
-			int count = 0;
-			if (!d.equals(Direction.Center)) directions[count]=d;
-			count++;
-		}
-		
-		return directions;
-	}
-	
-	//This is also useless. Nothing to see here.
-	public static Direction flipDirection(Direction dir)
-	{
-		if (dir.equals(Direction.North)) return Direction.South;
-		else if (dir.equals(Direction.Northeast)) return Direction.Southwest;
-		else if (dir.equals(Direction.East)) return Direction.West;
-		else if (dir.equals(Direction.Southeast)) return Direction.Northwest;
-		else if (dir.equals(Direction.South)) return Direction.North;
-		else if (dir.equals(Direction.Southwest)) return Direction.Southeast;
-		else if (dir.equals(Direction.West)) return Direction.East;
-		else return Direction.Southeast;
 	}
 	
 	//This is what you're looking for.
@@ -78,9 +51,9 @@ public class Pathing
 		
 		//Generates Direction[] w/o center in order N, NE, E, SE, S, SW, W, NW
 		Direction[] directions = new Direction[8];
+		int count = 0;
 		for (Direction d : Direction.values())
 		{
-			int count = 0;
 			if (!d.equals(Direction.Center)) directions[count]=d;
 			count++;
 		}
@@ -91,7 +64,7 @@ public class Pathing
 		//Initializes PriorityQueue
 		PriorityQueue<MapLocation> q = new PriorityQueue<MapLocation>(1, comparator);
 		
-		//Initializes Hashmap to store length of path to a given spaced
+		//Initializes Hashmap to store length of path to a given space
 		Map<MapLocation, Integer> cost_to_spot = new HashMap<MapLocation, Integer>();
 		
 		//Initializes Hashmap to store best path to a given space
@@ -187,7 +160,9 @@ public class Pathing
 			if (gc.canMove(id, dir))
 			{
 				gc.moveRobot(id, dir);
+				paths.get(unit)
 			}
+			
 		}
 	}
 		
