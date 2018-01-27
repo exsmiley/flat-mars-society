@@ -442,11 +442,11 @@ public class Player {
                                 	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
                                 	if (bestDir != null){
                                 		if (mars.onMap(unit.location().mapLocation().add(bestDir))) {
-    	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
-    	                                		if (gc.canHarvest(id, bestDir)) {
-    	                                			gc.harvest(id, bestDir);
-    	                                		}
-    	                                	}
+        	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
+        	                                		if (gc.canHarvest(id, bestDir)) {
+        	                                			gc.harvest(id, bestDir);
+        	                                		}
+        	                                	}
                                     	}                            		
                                 	}
     
@@ -482,8 +482,7 @@ public class Player {
                                     for (int j = 0; j < nearby.size(); j++) {
                                         Unit other = nearby.get(j);
                                         
-                                        if (!other.team().equals(myTeam)) {
-                                            
+                                        if (!other.team().equals(myTeam)) {                                            
                                             if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
                                                 gc.attack(id, other.id());
                                             }
