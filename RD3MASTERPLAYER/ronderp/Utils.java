@@ -297,7 +297,7 @@ public class Utils {
 		ArrayList<Direction> directions = new ArrayList<Direction>(Arrays.asList(Direction.North, Direction.Northeast, Direction.East, Direction.Southeast, Direction.South, Direction.Southwest, Direction.West, Direction.Northwest));
 		Direction tempDir = Direction.Center;
 		boolean foundDir = false;
-		while (!foundDir) {
+		while (!foundDir && directions.size() > 0) {
 			tempDir = arrayListRandom(directions);
 			if (gc.canMove(unit.id(), tempDir) && planet.onMap(unit.location().mapLocation())) {
 				foundDir = true;
