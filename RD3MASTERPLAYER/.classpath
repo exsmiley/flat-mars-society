@@ -8,6 +8,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/Users/RonLee/Desktop/IAP_2018/6.147/flat-mars-society/battlecode.jar"/>
-	<classpathentry kind="lib" path="/home/dbopp/Documents/Battlecode/flat-mars-society/battlecode.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

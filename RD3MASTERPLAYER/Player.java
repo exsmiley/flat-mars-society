@@ -109,7 +109,7 @@ public class Player {
                             Location location = unit.location();
                             MapLocation maplocation = unit.location().mapLocation();
                             
-                            if (location.isOnMap()) {     
+                            if (location.isOnMap()) {   
                                 VecUnit nearby = gc.senseNearbyUnits(location.mapLocation(), unit.visionRange());
                                 boolean hasMoved = false;
                                 boolean hasActed = false;
@@ -155,7 +155,7 @@ public class Player {
                                             hasMoved = true;
                                         }
                                     }
-                                }  
+                                }
                                 
                                 Direction randomDirection = Utils.chooseRandom(ordinals);
                                 // Replicate yourself
@@ -178,12 +178,12 @@ public class Player {
                                 // Get Karbonite
                                 
                                 else if (!hasActed) {
-                                	//First try adjacent squares/*
-                                	Direction bestDir = utils.bestKarboniteDirection(earth, maplocation);
-                                	if (gc.karboniteAt(maplocation.add(bestDir)) > 0) {
-                                		if (gc.canHarvest(id, bestDir)) {
-                                			gc.harvest(id, bestDir);
-                                		}
+                                    	//First try adjacent squares/*
+                                    	Direction bestDir = utils.bestKarboniteDirection(earth, maplocation);
+                                    	if (gc.karboniteAt(maplocation.add(bestDir)) > 0) {
+                                    		if (gc.canHarvest(id, bestDir)) {
+                                    			gc.harvest(id, bestDir);
+                                    		}
                                 	}
                                 	//Then go to the next closest location
                                 	
@@ -215,6 +215,7 @@ public class Player {
                                 }
                                
                             }
+                            
                         }
                         
                         
