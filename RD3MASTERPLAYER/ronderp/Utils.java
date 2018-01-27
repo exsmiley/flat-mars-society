@@ -293,13 +293,13 @@ public class Utils {
 		return bestUnit;
 	}
 	
-	public Direction smartDirection(Unit unit) {
+	public Direction smartDirection(PlanetMap planet, Unit unit) {
 		ArrayList<Direction> directions = new ArrayList<Direction>(Arrays.asList(Direction.North, Direction.Northeast, Direction.East, Direction.Southeast, Direction.South, Direction.Southwest, Direction.West, Direction.Northwest));
 		Direction tempDir = Direction.Center;
 		boolean foundDir = false;
 		while (!foundDir) {
 			tempDir = arrayListRandom(directions);
-			if (gc.canMove(unit.id(), tempDir)) {
+			if (gc.canMove(unit.id(), tempDir) && planet.onMap(unit.location().mapLocation())) {
 				foundDir = true;
 				return tempDir;
 			}else {
