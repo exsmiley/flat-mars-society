@@ -1,5 +1,7 @@
 package ronderp;
 import java.util.*;
+import java.util.stream.Stream;
+
 import bc.*;
 
 public class Utils {
@@ -17,6 +19,10 @@ public class Utils {
 	 */
 	public static <T> T chooseRandom(T[] arr) {
 		return arr[(int) (Math.random()*arr.length)];
+	}
+	
+	public static <T> T arrayListRandom(ArrayList<T> arr) {
+		return arr.get((int)(Math.random()*arr.size()));
 	}
 	
 	public static int randomNum(int big) {
@@ -297,4 +303,19 @@ public class Utils {
 		return bestUnit;
 	}
 	
+	public Direction smartDirection(Unit unit) {
+		ArrayList<Direction> directions = new ArrayList<Direction>(Arrays.asList(Direction.North, Direction.Northeast, Direction.East, Direction.Southeast, Direction.South, Direction.Southwest, Direction.West, Direction.Northwest));
+		Direction tempDir = Direction.Center;
+		boolean foundDir = false;
+		while (!foundDir) {
+			tempDir = arrayListRandom(directions);
+			if (gc.canMove(unit.id(), tempDir)) {
+				foundDir = true;
+				return tempDir;
+			}else {
+				directions.remove(tempDir);
+			}
+		}
+		return Direction.Center;
+	}
 }
