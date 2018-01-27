@@ -437,41 +437,40 @@ public class Player {
                         	//WORKER LOGIC
                             if (unit.unitType().equals(UnitType.Worker)) {
                             	
-                            	Direction randomDirection = Utils.chooseRandom(ordinals);
-                            	
-                            	
-                            	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
-                            	if (bestDir != null){
-                            		if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
-	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
-	                                		if (gc.canHarvest(id, bestDir)) {
-	                                			gc.harvest(id, bestDir);
-	                                		}
-	                                	}
-                                	}                            		
-                            	}
-
+                                	Direction randomDirection = Utils.chooseRandom(ordinals);
+                                	
+                                	
+                                	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
+                                	if (bestDir != null){
+                                		if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
+        	                                	if (gc.karboniteAt(unit.location().mapLocation().add(bestDir)) > 0) {
+        	                                		if (gc.canHarvest(id, bestDir)) {
+        	                                			gc.harvest(id, bestDir);
+        	                                		}
+        	                                	}
+                                    	}                            		
+                                	}
+    
                                 // Replicate yourself
-                            	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
-	                                if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
-	                                    gc.replicate(id, randomDirection);
-	                                }
-                            	}
-                            	
-                              
-                            	if (unit.movementHeat() < 10) {
-                            		Direction bestRanDir = utils.smartDirection(mars, unit);
-                            		gc.moveRobot(unit.id(), bestRanDir);
-                            	}
-                            	
-                            	
-                            	randomDirection = Utils.chooseRandom(ordinals);
-                            	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
-                                    if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10)  {
-                                        gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
-                                    }   
-                            	}
-                            	
+                                	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
+                                    if (gc.canReplicate(id, randomDirection) && produceWorkers && unit.abilityHeat() < 10) {
+                                        gc.replicate(id, randomDirection);
+                                    }
+                                	}
+                                	
+                                  
+                                	if (unit.movementHeat() < 10) {
+                                		Direction bestRanDir = utils.smartDirection(mars, unit);
+                                		gc.moveRobot(unit.id(), bestRanDir);
+                                	}
+                                	
+                                	
+                                	randomDirection = Utils.chooseRandom(ordinals);
+                                	if (mars.onMap(unit.location().mapLocation().add(randomDirection))) {
+                                        if (gc.canMove(unit.id(), randomDirection) && unit.movementHeat() < 10)  {
+                                            gc.moveRobot(unit.id(), randomDirection); // TODO: Change path
+                                        }   
+                                	}
                  
                             }
                             
@@ -491,8 +490,7 @@ public class Player {
                                     for (int j = 0; j < nearby.size(); j++) {
                                         Unit other = nearby.get(j);
                                         
-                                        if (!other.team().equals(myTeam)) {
-                                            
+                                        if (!other.team().equals(myTeam)) {                                            
                                             if (gc.canAttack(id, other.id()) && unit.attackHeat() < 10) {
                                                 gc.attack(id, other.id());
                                             }
