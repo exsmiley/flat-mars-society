@@ -1,5 +1,4 @@
 package ronderp;
-
 import bc.*;
 
 // This is an immutable ADT
@@ -10,7 +9,9 @@ public class Twople {
     private final Planet planet;
     
     /**
-     * @param m - MapLocation m
+     * @param x - x
+     * @param y - y
+     * @param planet - planet
      */
     public Twople(MapLocation m) {
         this.x = m.getX();
@@ -37,6 +38,14 @@ public class Twople {
      */
     public Planet getPlanet() {
         return planet;
+    }
+    
+    /**
+     * @returns mapLocation
+     */
+    public MapLocation getMapLocation()
+    {
+    	return new MapLocation(planet, x, y);
     }
     
     @Override

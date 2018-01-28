@@ -75,8 +75,10 @@ public class Player {
         // Initialize pathing object to help bois move places
         SimplePathing pathing = new SimplePathing(mars, earth, gc);
         
+        MapLocation enemyLocationOnMars = null;
+        
         while (true) {
-            System.out.println("Current round: "+gc.round());
+            //System.out.println("Current round: "+gc.round());
             
             // Initialize number of each unit to 0 at beginning of each round.
             int numOfFactories = 0;
@@ -127,8 +129,10 @@ public class Player {
                                         }
                                         
                                         else if (gc.canLoad(other.id(), id) && other.unitType().equals(UnitType.Rocket)) {
-                                            gc.load(other.id(), id);
-                                            continue;
+                                            if (other.structureGarrison().size() < 2) {
+                                                gc.load(other.id(), id);
+                                                continue;
+                                            }
                                         }
                                         
                                         // Walk toward factory/Rocket to work on it.
@@ -222,7 +226,7 @@ public class Player {
                         //ROCKET LOGIC
                         else if (unit.unitType().equals(UnitType.Rocket)  && unit.location().mapLocation().getPlanet().equals(Planet.Earth)) { 
                             numOfRockets++;
-                            if(gc.canLaunchRocket(id, ml) && unit.structureGarrison().size() >= 6) {
+                            if(gc.canLaunchRocket(id, ml) && unit.structureGarrison().size() >= 4) {
                                 gc.launchRocket(id, ml);
                                 System.out.println("Launched a rocket to (" + ml.getX() + ", " + ml.getY() + ")");
                                 ml = new MapLocation(Planet.Mars, Utils.randomNum((int) mars.getWidth()), Utils.randomNum((int) mars.getHeight()));
@@ -325,7 +329,11 @@ public class Player {
                                 }
                                 
                                 if (!hasMoved && unit.movementHeat() < 10 && !hasLoaded) {
-                                    pathing.moveTo(unit, enemyLoc);
+                                    Direction smartDirection = utils.smartDirection(earth, unit);
+                                    if (gc.canMove(id, smartDirection)) {
+                                        gc.moveRobot(id, smartDirection);
+                                    }
+                                    //pathing.moveTo(unit, enemyLoc);
                                 }
                             }
                         }
@@ -435,10 +443,17 @@ public class Player {
                         if (unit.location().mapLocation().getPlanet().equals(Planet.Mars)) {
                         	
                         	//WORKER LOGIC
-                            if (unit.unitType().equals(UnitType.Worker)) {
+                            if (unit.unitType().equals(UnitType.Worker) && unit.location().isOnMap()) {
                             	
                                 	Direction randomDirection = Utils.chooseRandom(ordinals);
                                 	
+                                	VecUnit nearby = gc.senseNearbyUnits(unit.location().mapLocation(), unit.visionRange());
+                                	for (int j = 0; j < nearby.size(); j++) {
+                                	    Unit other = nearby.get(j);
+                                	    if (!other.team().equals(myTeam)) {
+                                	        enemyLocationOnMars = other.location().mapLocation();
+                                	    }
+                                	}
                                 	
                                 	Direction bestDir = utils.bestKarboniteDirection(mars, unit.location().mapLocation());
                                 	if (bestDir != null){
@@ -466,14 +481,14 @@ public class Player {
                  
                             }
                             
-                            else if (unit.unitType().equals(UnitType.Rocket)) {
+                            else if (unit.unitType().equals(UnitType.Rocket) && unit.location().isOnMap()) {
                                 Direction randomDirection = Utils.chooseRandom(ordinals);
                                 if (gc.canUnload(id, randomDirection)) {
                                     gc.unload(id, randomDirection);
                                 }
                             }
                             
-                            else if (unit.unitType().equals(UnitType.Ranger)) {
+                            else if (unit.unitType().equals(UnitType.Ranger) && unit.location().isOnMap()) {
                                 numOfRangers++;
                                 boolean hasMoved = false;
                                 Location location = unit.location();  
@@ -494,8 +509,14 @@ public class Player {
                                     }
                                     
                                     if (!hasMoved && unit.movementHeat() < 10) {
-                                    	Direction bestRanDir = utils.smartDirection(mars, unit);
-                                        gc.moveRobot(unit.id(), bestRanDir);
+                                        if (enemyLocationOnMars != null) {
+                                            System.out.println("HOLY MAN WE FOUND SOMEONE");
+                                            pathing.moveTo(unit, enemyLocationOnMars);
+                                        }
+                                        else {
+                                    	        Direction bestRanDir = utils.smartDirection(mars, unit);
+                                    	        gc.moveRobot(unit.id(), bestRanDir);
+                                        }
                                     }
                                 }
                             }
@@ -509,7 +530,7 @@ public class Player {
             }
             
             // Check whether or not to keep producing each unit.
-            if (numOfRangers > 25) {
+            if (numOfRangers > 20) {
                 produceRangers = false;
             }
             else {
@@ -530,7 +551,7 @@ public class Player {
                 produceKnights = true;
             }
             
-            if (numOfRockets > 3) {
+            if (numOfRockets > 1 || numOfFactories < 2) {
                 produceRockets = false;
             }
             else {
@@ -544,7 +565,7 @@ public class Player {
                 produceFactories = true;
             }
             
-            if (numOfWorkers > 5 && gc.round() < 750) {
+            if (numOfWorkers > 3 && gc.round() < 750) {
                 produceWorkers = false;
             }
             else {
