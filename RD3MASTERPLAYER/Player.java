@@ -138,7 +138,7 @@ public class Player {
                                         // Walk toward factory/Rocket to work on it.
                                         else {
                                             MapLocation factoryRocketLocation = other.location().mapLocation();
-                                            if (location.mapLocation().distanceSquaredTo(factoryRocketLocation) > 1) {
+                                            if (location.mapLocation().distanceSquaredTo(factoryRocketLocation) > 2) {
                                                 Direction directionToWalk = location.mapLocation().directionTo(factoryRocketLocation);
                                                 if (gc.canMove(id, directionToWalk) && unit.movementHeat() < 10 && !hasMoved) {
                                                     gc.moveRobot(id, directionToWalk); // TODO: Change path
@@ -313,18 +313,18 @@ public class Player {
                                     }
                                     
                                     else if (other.unitType().equals(UnitType.Rocket)) {
-                                        if (location.mapLocation().distanceSquaredTo(other.location().mapLocation()) <= 1) {
+                                        if (location.mapLocation().distanceSquaredTo(other.location().mapLocation()) <= 2) {
                                             if (gc.canLoad(other.id(), id)) {
                                                 gc.load(other.id(), id);
                                                 continue;
                                             }
                                         }
-                                        /*
+                                        
                                         else {
                                             pathing.moveTo(unit, other.location().mapLocation());
                                             hasMoved = true;
                                         }
-                                        */
+                                        
                                     }
                                 }
                                 
@@ -510,7 +510,6 @@ public class Player {
                                     
                                     if (!hasMoved && unit.movementHeat() < 10) {
                                         if (enemyLocationOnMars != null) {
-                                            System.out.println("HOLY MAN WE FOUND SOMEONE");
                                             pathing.moveTo(unit, enemyLocationOnMars);
                                         }
                                         else {
@@ -530,7 +529,7 @@ public class Player {
             }
             
             // Check whether or not to keep producing each unit.
-            if (numOfRangers > 20) {
+            if (numOfRangers > 50) {
                 produceRangers = false;
             }
             else {
@@ -551,7 +550,7 @@ public class Player {
                 produceKnights = true;
             }
             
-            if (numOfRockets > 1 || numOfFactories < 2) {
+            if (numOfRockets > 1 || numOfFactories < 1) {
                 produceRockets = false;
             }
             else {
