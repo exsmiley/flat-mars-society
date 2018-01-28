@@ -129,7 +129,7 @@ public class Player {
                                         }
                                         
                                         else if (gc.canLoad(other.id(), id) && other.unitType().equals(UnitType.Rocket)) {
-                                            if (other.structureGarrison().size() < 2) {
+                                            if (other.structureGarrison().size() < 3) {
                                                 gc.load(other.id(), id);
                                                 continue;
                                             }
@@ -319,21 +319,17 @@ public class Player {
                                                 continue;
                                             }
                                         }
-                                        
+                                        /*
                                         else {
                                             pathing.moveTo(unit, other.location().mapLocation());
                                             hasMoved = true;
                                         }
-                                        
+                                        */
                                     }
                                 }
                                 
                                 if (!hasMoved && unit.movementHeat() < 10 && !hasLoaded) {
-                                    Direction smartDirection = utils.smartDirection(earth, unit);
-                                    if (gc.canMove(id, smartDirection)) {
-                                        gc.moveRobot(id, smartDirection);
-                                    }
-                                    //pathing.moveTo(unit, enemyLoc);
+                                    pathing.moveTo(unit, enemyLoc);
                                 }
                             }
                         }
@@ -529,7 +525,7 @@ public class Player {
             }
             
             // Check whether or not to keep producing each unit.
-            if (numOfRangers > 50) {
+            if (numOfRangers > 20) {
                 produceRangers = false;
             }
             else {
@@ -550,7 +546,7 @@ public class Player {
                 produceKnights = true;
             }
             
-            if (numOfRockets > 1 || numOfFactories < 1) {
+            if (numOfRockets > 1 || numOfFactories < 2) {
                 produceRockets = false;
             }
             else {
