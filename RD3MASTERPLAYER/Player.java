@@ -11,6 +11,7 @@ import java.util.*;
 public class Player {
     public static void main(String[] args) {   
         // Connect to the manager, starting the game
+    		long timeAllotedMS = 10*1000;
         GameController gc = new GameController();
 
         Utils utils = new Utils(gc);
@@ -69,6 +70,7 @@ public class Player {
         
         boolean canRocket = false;
         
+        
         // Direction is a normal java enum.
         Direction[] ordinals = new Direction[]{Direction.North, Direction.South, Direction.West, Direction.East};
         
@@ -79,7 +81,15 @@ public class Player {
         
         while (true) {
             //System.out.println("Current round: "+gc.round());
-            
+        	
+        		// if time getting close to 0 then we're about to timeout
+        		if(timeAllotedMS < 150) {
+        			timeAllotedMS += 50;
+        			gc.nextTurn();
+        			continue;
+        		}
+        	
+        		long startTime = System.currentTimeMillis();
             // Initialize number of each unit to 0 at beginning of each round.
             int numOfFactories = 0;
             int numOfRockets = 0;
@@ -576,6 +586,14 @@ public class Player {
             
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
+            
+            // lose the time we took
+            long estimatedTime = System.currentTimeMillis() - startTime;
+            timeAllotedMS -= estimatedTime;
+            
+            // add time for new round
+            timeAllotedMS += 50;
         }
+        
     }
 }
