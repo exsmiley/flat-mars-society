@@ -3,14 +3,14 @@ import java.util.PriorityQueue;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-// import MapLocationComparator; //HOW THE FUCK DO YOU IMPORT THIS SHIT???
+// import MapLocationComparator;
 import java.util.Comparator;
 import bc.*;
 
 /*
  * HOW TO USE:
  * In that dank battlecodecode you got, initialize a Pathing object in the form Pathing pathing = new Pathing(VecUnit units, PlanetMap mars, PlanetMap earth); OUTSIDE OF THE LOOP THAT IS YOUR TURN.
- * This object stores all the paths for all you bots, so if you overwrite it with each turn, you fucking break everything. don't do that.
+ * This object stores all the paths for all you bots, so if you overwrite it with each turn, you break everything. don't do that.
  * 
  * When you want to make one of your robo-bois move or create a path, just call pathingObjectName.moveTo(Unit unit, MapLocation end) where unit is the unit
  * and end is the place you want to move to. IT IS THE SAME FUNCTION TO MOVE A BOT AND GENERATE A PATH. IF THE ROBOT HAS A PATH IT MOVES, IF NOT IT MAKES ONE
@@ -19,10 +19,8 @@ import bc.*;
 
 /* 
  * TODO: 
- * - FUCKING FIGURE OUT HOW TO FUCKING IMPORT FUCKING MAPLOCATIONCOMPARATOR. FUCK.
  * - Fix cost to spot calculations. Might have to store full path to each spot or else be smart.
  * - Implement how to move in groups. Maybe bug pathing or fuzzygoto.
- * - fuk bichez git muny
  */
 
 
@@ -87,7 +85,6 @@ public class Pathing
 			{
 			    MapLocation next = current.add(dir);
 				
-			    //Bush did 9/11
 				boolean passable;
 				if (!map.onMap(next)) passable = false;
 				else if ((int) map.isPassableTerrainAt(next) == 1) passable = true;

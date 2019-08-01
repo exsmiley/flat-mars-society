@@ -13,8 +13,7 @@ public class LocComparator implements Comparator<Loc>
 		else if (checkloc.w<oldloc.w) return 1;
 		else 
 		{
-			System.out.println("FUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCKFUCK");
-			return 69;
+			return 2;
 		}
 	}
 }
